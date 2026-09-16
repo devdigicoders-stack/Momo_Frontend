@@ -50,7 +50,7 @@ const Login = () => {
     setIsLoading(true);
     const toastId = toast.loading('Authenticating credentials...');
     
-    const result = await login(cleanIdentifier, password);
+    const result = await login(cleanIdentifier, password, activeRole);
     setIsLoading(false);
     toast.dismiss(toastId);
 
@@ -68,16 +68,22 @@ const Login = () => {
       <div className="absolute -top-32 -left-32 w-96 h-96 bg-[#F97316]/10 rounded-full blur-3xl pointer-events-none"></div>
       <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-[#172033]/10 rounded-full blur-3xl pointer-events-none"></div>
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center relative z-10">
-        {/* Brand Logo / Badge */}
-        <div className="inline-flex items-center justify-center p-3.5 rounded-2xl bg-[#F97316] text-white shadow-xl shadow-[#F97316]/25 mb-3.5 ring-4 ring-[#FFF0E5]">
-          <Flame className="w-8 h-8" />
+      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center relative z-10 px-4">
+        {/* Circular Mascot Logo Container */}
+        <div className="relative inline-block mb-3">
+          <div className="w-28 h-28 mx-auto rounded-full bg-white p-1 shadow-xl shadow-[#F97316]/20 border-2 border-[#FDBA74] flex items-center justify-center">
+            <img 
+              src="/logo.png" 
+              alt="Momos Bhandar Mascot" 
+              className="w-full h-full object-cover rounded-full"
+            />
+          </div>
         </div>
 
         <h1 className="text-3xl font-black text-[#172033] tracking-tight sm:text-4xl">
           Momos Bhandar
         </h1>
-        <p className="mt-1.5 text-sm text-[#6B7280] font-medium">
+        <p className="mt-1 text-sm text-[#6B7280] font-medium">
           Restaurant Management & Business Control System
         </p>
       </div>

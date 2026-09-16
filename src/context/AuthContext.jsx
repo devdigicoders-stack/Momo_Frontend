@@ -38,13 +38,16 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
-  const login = async (identifier, password) => {
+  const login = async (identifier, password, requiredRole) => {
     try {
       const payload = { password };
       if (String(identifier).includes('@')) {
         payload.email = identifier.trim().toLowerCase();
       } else {
         payload.mobile = identifier.trim();
+      }
+      if (requiredRole) {
+        payload.role = requiredRole;
       }
 
       const res = await authService.login(payload);

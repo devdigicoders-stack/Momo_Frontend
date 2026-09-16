@@ -25,7 +25,7 @@ import {
   Hourglass,
   Users,
 } from 'lucide-react';
-import SkeletonLoader from '../components/SkeletonLoader';
+import { SkeletonCard } from '../components/SkeletonLoader';
 import toast from 'react-hot-toast';
 
 const Dashboard = () => {
@@ -94,7 +94,19 @@ const Dashboard = () => {
   const momoPurchase = summaryData?.momoPurchase ?? 0;
   const momoPurchaseQty = summaryData?.momoPurchaseQty ?? 0;
   const momoPurchasesCount = summaryData?.momoPurchasesCount ?? 0;
-  const cash = summaryData?.cash || { opening: 0, received: 0, paid: 0, closing: 0, count: 0 };
+  const cash = summaryData?.cash || {
+    opening: 0,
+    received: 0,
+    paid: 0,
+    closing: 0,
+    cashCollection: 0,
+    additionalCash: 0,
+    cashExpenses: 0,
+    cashDeposit: 0,
+    netCashChange: 0,
+    availableCash: 0,
+    count: 0,
+  };
   const chefReqs = summaryData?.chefRequirements || {
     total: 0,
     pending: 0,
@@ -116,7 +128,7 @@ const Dashboard = () => {
             <span>Momos Bhandar • Business Control Portal</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2">
-            Welcome, {user?.name}! <span className="inline-block animate-bounce">👋</span>
+            Welcome, {user?.name}!
           </h1>
           <p className="text-xs sm:text-sm text-slate-300 font-medium">
             Signed in as <span className="font-bold text-[#F97316]">{getRoleLabel(role)}</span> (
@@ -124,10 +136,17 @@ const Dashboard = () => {
           </p>
         </div>
 
-        <div className="shrink-0 self-start md:self-center">
-          <div className="inline-flex items-center px-3.5 py-1.5 rounded-full bg-[#121929] border border-[#232F48] text-xs font-semibold text-slate-200 shadow-xs">
-            <span className="w-2 h-2 rounded-full bg-[#16A34A] mr-2 animate-pulse"></span>
-            Phase 4: Basic Data Summary
+        <div className="hidden md:flex items-center space-x-3 bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/15">
+          <div className="w-12 h-12 rounded-full bg-white p-0.5 shadow-md shadow-black/20 shrink-0">
+            <img 
+              src="/logo.png" 
+              alt="Momos Bhandar" 
+              className="w-full h-full object-cover rounded-full"
+            />
+          </div>
+          <div>
+            <p className="text-xs font-bold text-white leading-tight">Momos Bhandar</p>
+            <p className="text-[11px] text-[#F97316] font-semibold">Good Food • Better Business</p>
           </div>
         </div>
       </div>
@@ -251,7 +270,11 @@ const Dashboard = () => {
 
       {/* 5. Main Content / Skeletons */}
       {loading ? (
-        <SkeletonLoader count={4} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
       ) : (
         <>
           {/* CHEF VIEW */}
@@ -602,32 +625,44 @@ const Dashboard = () => {
                       <Wallet className="w-5 h-5 text-[#F97316]" />
                       <h2 className="text-sm font-black text-[#172033]">Cash Drawer Movement</h2>
                     </div>
-                    <span className="text-xs font-bold text-[#6B7280]">{cash.count} Logs</span>
+                    <span className="text-xs font-bold text-[#6B7280]">
+                      {cash.count || 0} Logs
+                    </span>
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div className="bg-[#F9FAFB] p-2.5 rounded-xl border border-[#E5E7EB]">
-                      <span className="text-[10px] font-bold text-[#6B7280] block">Opening</span>
+                      <span className="text-[10px] font-bold text-[#6B7280] block">
+                        {cash.opening !== undefined ? 'Opening' : 'Cash Sales'}
+                      </span>
                       <span className="text-xs font-black text-[#172033] block mt-0.5">
-                        ₹{cash.opening.toLocaleString('en-IN')}
+                        ₹{(cash.opening ?? cash.cashCollection ?? 0).toLocaleString('en-IN')}
                       </span>
                     </div>
                     <div className="bg-emerald-50 p-2.5 rounded-xl border border-emerald-100">
-                      <span className="text-[10px] font-bold text-emerald-700 block">Received</span>
+                      <span className="text-[10px] font-bold text-emerald-700 block">
+                        {cash.received !== undefined ? 'Received' : 'Additional Inflow'}
+                      </span>
                       <span className="text-xs font-black text-[#16A34A] block mt-0.5">
-                        +₹{cash.received.toLocaleString('en-IN')}
+                        +₹{(cash.received ?? cash.additionalCash ?? 0).toLocaleString('en-IN')}
                       </span>
                     </div>
                     <div className="bg-rose-50 p-2.5 rounded-xl border border-rose-100">
-                      <span className="text-[10px] font-bold text-rose-700 block">Paid Out</span>
+                      <span className="text-[10px] font-bold text-rose-700 block">
+                        {cash.paid !== undefined ? 'Paid Out' : 'Cash Expenses'}
+                      </span>
                       <span className="text-xs font-black text-[#DC2626] block mt-0.5">
-                        -₹{cash.paid.toLocaleString('en-IN')}
+                        -₹{(cash.paid ?? cash.cashExpenses ?? 0).toLocaleString('en-IN')}
                       </span>
                     </div>
                     <div className="bg-blue-50 p-2.5 rounded-xl border border-blue-100">
-                      <span className="text-[10px] font-bold text-blue-700 block">Closing</span>
+                      <span className="text-[10px] font-bold text-blue-700 block">
+                        {cash.closing !== undefined ? 'Closing' : 'Bank Deposits'}
+                      </span>
                       <span className="text-xs font-black text-[#2563EB] block mt-0.5">
-                        ₹{cash.closing.toLocaleString('en-IN')}
+                        {cash.closing !== undefined
+                          ? `₹${cash.closing.toLocaleString('en-IN')}`
+                          : `-₹${(cash.cashDeposit ?? 0).toLocaleString('en-IN')}`}
                       </span>
                     </div>
                   </div>

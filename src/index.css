@@ -15,6 +15,12 @@
   }
 }
 
+@layer utilities {
+  .modal-backdrop {
+    @apply fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-200;
+  }
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

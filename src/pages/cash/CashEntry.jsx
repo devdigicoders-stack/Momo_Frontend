@@ -831,7 +831,23 @@ const CashEntry = () => {
 
           {/* Transactions Table */}
           {loadingLedger ? (
-            <SkeletonLoader rows={6} />
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-gray-50 dark:bg-navy-800/60 text-navy-500 font-semibold uppercase tracking-wider">
+                  <tr>
+                    <th className="p-3 rounded-l-xl">Entry Code & Type</th>
+                    <th className="p-3">Date</th>
+                    <th className="p-3">Flow</th>
+                    <th className="p-3">Amount</th>
+                    <th className="p-3">Summary & Details</th>
+                    <th className="p-3">Slip / Attachment</th>
+                    <th className="p-3">Entered By</th>
+                    <th className="p-3 text-right rounded-r-xl">Actions</th>
+                  </tr>
+                </thead>
+                <SkeletonLoader rows={6} columns={8} />
+              </table>
+            </div>
           ) : transactions.length === 0 ? (
             <div className="text-center py-12">
               <Wallet className="w-10 h-10 text-navy-300 mx-auto mb-2" />
@@ -1277,7 +1293,7 @@ const CashEntry = () => {
 
       {/* 7. DEPOSIT SLIP PREVIEW MODAL */}
       {viewSlipUrl && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-200">
           <div className="bg-white dark:bg-navy-900 rounded-2xl max-w-xl w-full border border-gray-100 dark:border-navy-800 shadow-2xl overflow-hidden animate-fadeIn">
             <div className="p-4 border-b border-gray-100 dark:border-navy-800 flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -1327,7 +1343,7 @@ const CashEntry = () => {
 
       {/* 8. EDIT RECORD MODAL */}
       {editModalOpen && editingItem && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-200">
           <div className="bg-white dark:bg-navy-900 rounded-2xl max-w-lg w-full border border-gray-100 dark:border-navy-800 shadow-2xl overflow-hidden animate-fadeIn">
             <div className="p-4 border-b border-gray-100 dark:border-navy-800 flex items-center justify-between bg-orange-50/50 dark:bg-navy-800">
               <div>

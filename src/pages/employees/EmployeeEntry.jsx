@@ -20,6 +20,7 @@ import {
   Download,
   History as HistoryIcon,
   CheckCircle2,
+  XCircle,
   AlertTriangle,
   UserX,
   CreditCard,
@@ -33,7 +34,7 @@ import {
   RefreshCw,
   Users,
 } from 'lucide-react';
-import SkeletonLoader from '../../components/SkeletonLoader';
+import SkeletonLoader, { SkeletonBlock } from '../../components/SkeletonLoader';
 import toast from 'react-hot-toast';
 
 const DESIGNATIONS = ['Manager', 'Chef', 'Helper', 'Cashier', 'Waiter', 'Delivery', 'Other'];
@@ -536,12 +537,12 @@ const EmployeeEntry = () => {
   // Chef restricted view check
   if (user?.role === 'CHEF') {
     return (
-      <div className="p-8 text-center bg-white dark:bg-navy-900 rounded-2xl border border-gray-100 dark:border-navy-800 shadow-sm max-w-lg mx-auto mt-10 animate-fadeIn">
+      <div className="p-8 text-center bg-white rounded-2xl border border-[#E5E7EB] shadow-xs max-w-lg mx-auto mt-10 animate-fadeIn">
         <div className="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center mx-auto mb-4">
           <AlertTriangle className="w-8 h-8" />
         </div>
-        <h2 className="text-lg font-black text-navy-900 dark:text-white mb-1">Access Restricted</h2>
-        <p className="text-xs text-navy-500 dark:text-navy-400">
+        <h2 className="text-lg font-black text-[#172033] mb-1">Access Restricted</h2>
+        <p className="text-xs text-[#6B7280]">
           The Employee & Payroll management module is reserved for management roles. Please use the Kitchen Requisitions tab.
         </p>
       </div>
@@ -550,155 +551,184 @@ const EmployeeEntry = () => {
 
   return (
     <div className="space-y-6 pb-12 animate-fadeIn">
-      {/* 1. HERO OPERATIONAL SUMMARY BAR */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {/* Active Staff */}
-        <div className="bg-white dark:bg-navy-900 rounded-2xl p-5 border border-gray-100 dark:border-navy-800 shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-navy-400">Active Staff</span>
-            <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold">
-              <Users className="w-4 h-4" />
-            </div>
+      {/* 0. HEADER & TITLE BANNER */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white p-5 rounded-2xl border border-[#E5E7EB] shadow-xs">
+        <div>
+          <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#FFF0E5] text-[#F97316] mb-1.5">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Permanent Staff & Payroll Portal</span>
           </div>
-          <div className="my-2">
-            <h3 className="text-2xl font-black text-navy-900 dark:text-white">
-              {summaryCounts?.activeEmployees ?? allActiveEmps.length}
-            </h3>
-            <p className="text-[10px] text-navy-400 mt-0.5">Enrolled regular staff</p>
-          </div>
-          <div className="text-[10px] text-navy-500 border-t border-gray-100 dark:border-navy-800 pt-2">
-            Total Staff: {summaryCounts?.totalEmployees ?? employees.length}
-          </div>
+          <h1 className="text-xl sm:text-2xl font-bold text-[#172033] flex items-center gap-2.5">
+            <Users className="w-7 h-7 text-[#F97316]" /> Staff & Employee Management
+          </h1>
+          <p className="text-xs text-[#6B7280] mt-1">
+            Manage permanent staff records, track daily attendance, record salary advances, and generate monthly payroll.
+          </p>
         </div>
 
-        {/* Advances This Month */}
-        <div className="bg-white dark:bg-navy-900 rounded-2xl p-5 border border-gray-100 dark:border-navy-800 shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600">
-              Advances ({selectedMonth})
-            </span>
-            <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold">
-              <TrendingDown className="w-4 h-4" />
-            </div>
+        {/* Global Month Selector & Quick Refresh */}
+        <div className="flex items-center gap-2.5 shrink-0">
+          <div className="flex items-center gap-2 bg-[#FFF8F1] border border-[#E5E7EB] px-3.5 py-2 rounded-xl text-xs">
+            <Calendar className="w-4 h-4 text-[#F97316]" />
+            <span className="font-bold text-[#6B7280]">Salary Month:</span>
+            <input
+              type="month"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="bg-transparent text-[#172033] font-bold text-xs focus:outline-none cursor-pointer"
+            />
           </div>
-          <div className="my-2">
-            <h3 className="text-2xl font-black text-amber-600">
-              ₹{(summaryCounts?.totalAdvances || 0).toLocaleString('en-IN')}
-            </h3>
-            <p className="text-[10px] text-navy-400 mt-0.5">Disbursed salary advance</p>
-          </div>
-          <div className="text-[10px] text-amber-600 font-semibold border-t border-gray-100 dark:border-navy-800 pt-2">
-            Deductible at payout
-          </div>
-        </div>
 
-        {/* Pending Salaries */}
-        <div className="bg-white dark:bg-navy-900 rounded-2xl p-5 border border-gray-100 dark:border-navy-800 shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-orange-600">
-              Pending Payouts
-            </span>
-            <div className="w-8 h-8 rounded-xl bg-orange-500/10 text-orange-600 flex items-center justify-center font-bold">
-              <Clock className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="my-2">
-            <h3 className="text-2xl font-black text-orange-600">
-              {summaryCounts?.pendingSalaries ?? 0}
-            </h3>
-            <p className="text-[10px] text-navy-400 mt-0.5">Staff awaiting payout for {selectedMonth}</p>
-          </div>
-          <div className="text-[10px] text-orange-600 font-semibold border-t border-gray-100 dark:border-navy-800 pt-2">
-            Requires disbursement
-          </div>
-        </div>
-
-        {/* Paid Salaries */}
-        <div className="bg-white dark:bg-navy-900 rounded-2xl p-5 border border-gray-100 dark:border-navy-800 shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600">
-              Paid Payouts
-            </span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold">
-              <CheckCircle2 className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="my-2">
-            <h3 className="text-2xl font-black text-emerald-600">
-              {summaryCounts?.paidSalariesCount ?? 0}
-            </h3>
-            <p className="text-[10px] text-navy-400 mt-0.5">Completed salary vouchers</p>
-          </div>
-          <div className="text-[10px] text-emerald-600 font-semibold border-t border-gray-100 dark:border-navy-800 pt-2">
-            Disbursed & logged
-          </div>
+          <button
+            onClick={() => {
+              fetchEmployees(empPage);
+              fetchSummaryOverview();
+              if (activeTab === 'SALARY_SHEET') fetchSalarySheet();
+              if (activeTab === 'SALARY_LEDGER') fetchPayments(payPage);
+              if (activeTab === 'ADVANCES') fetchAdvances(advPage);
+              toast.success('Data refreshed');
+            }}
+            className="p-2.5 bg-white hover:bg-[#FFF0E5] text-[#172033] rounded-xl border border-[#E5E7EB] hover:border-[#F97316] transition cursor-pointer shadow-2xs"
+            title="Refresh All"
+          >
+            <RefreshCw className={`w-4 h-4 text-[#172033] ${loadingSummary ? 'animate-spin text-[#F97316]' : ''}`} />
+          </button>
         </div>
       </div>
 
-      {/* 2. TOP WORKSPACE NAVIGATION & MONTH SWITCHER */}
-      <div className="bg-white dark:bg-navy-900 rounded-2xl p-4 border border-gray-100 dark:border-navy-800 shadow-sm flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        {/* Workspace Tab Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0">
-          {[
-            { id: 'DIRECTORY', label: '👥 Staff Directory', count: empTotal },
-            { id: 'ATTENDANCE', label: '📅 Daily Attendance & Absents' },
-            { id: 'ADVANCES', label: '💸 Salary Advances', count: advTotal },
-            { id: 'SALARY_SHEET', label: '💼 Monthly Salary Sheet' },
-            { id: 'SALARY_LEDGER', label: '📜 Payment Ledger', count: payTotal },
-          ].map((tab) => (
+      {/* 1. HERO OPERATIONAL SUMMARY CARDS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Active Staff */}
+        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-xs relative overflow-hidden flex flex-col justify-between">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-[#6B7280]">Active Staff</p>
+              <h3 className="text-2xl font-bold text-[#172033] mt-1">
+                {summaryCounts?.activeEmployees ?? allActiveEmps.length}{' '}
+                <span className="text-xs font-normal text-[#6B7280]">
+                  / {summaryCounts?.totalEmployees ?? employees.length} total
+                </span>
+              </h3>
+            </div>
+            <div className="p-3 bg-blue-50 text-blue-600 rounded-xl border border-blue-100">
+              <Users className="w-5 h-5" />
+            </div>
+          </div>
+          <p className="text-xs text-[#6B7280] mt-3 flex items-center gap-1.5 font-medium border-t border-[#F3F4F6] pt-2.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Enrolled regular staff
+          </p>
+        </div>
+
+        {/* Advances This Month */}
+        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-xs relative overflow-hidden flex flex-col justify-between">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-[#6B7280]">Advances ({selectedMonth})</p>
+              <h3 className="text-2xl font-bold text-amber-600 mt-1">
+                ₹{(summaryCounts?.totalAdvances || 0).toLocaleString('en-IN')}
+              </h3>
+            </div>
+            <div className="p-3 bg-amber-50 text-amber-600 rounded-xl border border-amber-100">
+              <TrendingDown className="w-5 h-5" />
+            </div>
+          </div>
+          <p className="text-xs text-amber-600 mt-3 flex items-center gap-1.5 font-semibold border-t border-[#F3F4F6] pt-2.5">
+            Deductible at monthly payout
+          </p>
+        </div>
+
+        {/* Pending Salaries */}
+        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-xs relative overflow-hidden flex flex-col justify-between">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-[#6B7280]">Pending Payouts</p>
+              <h3 className="text-2xl font-bold text-[#F97316] mt-1">
+                {summaryCounts?.pendingSalaries ?? 0}{' '}
+                <span className="text-xs font-normal text-[#6B7280]">staff pending</span>
+              </h3>
+            </div>
+            <div className="p-3 bg-orange-50 text-[#F97316] rounded-xl border border-orange-100">
+              <Clock className="w-5 h-5" />
+            </div>
+          </div>
+          <p className="text-xs text-[#F97316] mt-3 flex items-center gap-1.5 font-semibold border-t border-[#F3F4F6] pt-2.5">
+            Awaiting disbursement for {selectedMonth}
+          </p>
+        </div>
+
+        {/* Paid Salaries */}
+        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-xs relative overflow-hidden flex flex-col justify-between">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-[#6B7280]">Paid Payouts</p>
+              <h3 className="text-2xl font-bold text-emerald-600 mt-1">
+                {summaryCounts?.paidSalariesCount ?? 0}{' '}
+                <span className="text-xs font-normal text-[#6B7280]">vouchers</span>
+              </h3>
+            </div>
+            <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100">
+              <CheckCircle2 className="w-5 h-5" />
+            </div>
+          </div>
+          <p className="text-xs text-emerald-600 mt-3 flex items-center gap-1.5 font-semibold border-t border-[#F3F4F6] pt-2.5">
+            Disbursed & logged in ledger
+          </p>
+        </div>
+      </div>
+
+      {/* 2. TOP WORKSPACE NAVIGATION TABS */}
+      <div className="flex items-center gap-2 border-b border-[#E5E7EB] pb-2 overflow-x-auto">
+        {[
+          { id: 'DIRECTORY', label: 'Staff Directory', icon: Users, count: empTotal },
+          { id: 'ATTENDANCE', label: 'Daily Attendance & Absents', icon: Calendar },
+          { id: 'ADVANCES', label: 'Salary Advances', icon: TrendingDown, count: advTotal },
+          { id: 'SALARY_SHEET', label: 'Monthly Salary Sheet', icon: Briefcase },
+          { id: 'SALARY_LEDGER', label: 'Payment Ledger', icon: FileText, count: payTotal },
+        ].map((tab) => {
+          const IconComponent = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
-                activeTab === tab.id
-                  ? 'bg-navy-900 dark:bg-white text-white dark:text-navy-900 shadow-sm'
-                  : 'bg-gray-50 dark:bg-navy-800 text-navy-600 dark:text-navy-300 hover:bg-gray-100'
+              className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
+                isActive
+                  ? 'bg-[#F97316] text-white shadow-md shadow-[#F97316]/20'
+                  : 'bg-white border border-[#E5E7EB] text-[#6B7280] hover:text-[#172033] hover:bg-[#FFF0E5]/60'
               }`}
             >
-              {tab.label}
+              <IconComponent className="w-4 h-4" />
+              <span>{tab.label}</span>
               {tab.count !== undefined && (
                 <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                    activeTab === tab.id
-                      ? 'bg-orange-500 text-white'
-                      : 'bg-gray-200 dark:bg-navy-700 text-navy-700 dark:text-navy-200'
+                  className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold ${
+                    isActive ? 'bg-white/25 text-white' : 'bg-[#FFF0E5] text-[#F97316]'
                   }`}
                 >
                   {tab.count}
                 </span>
               )}
             </button>
-          ))}
-        </div>
-
-        {/* Global Month Selector */}
-        <div className="flex items-center gap-2 shrink-0">
-          <label className="text-xs font-bold text-navy-700 dark:text-navy-300">Salary Month:</label>
-          <input
-            type="month"
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            className="px-3 py-1.5 text-xs font-bold rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800 text-navy-900 dark:text-white outline-none cursor-pointer"
-          />
-        </div>
+          );
+        })}
       </div>
 
       {/* 3. TAB 1: EMPLOYEE MASTER DIRECTORY */}
       {activeTab === 'DIRECTORY' && (
-        <div className="bg-white dark:bg-navy-900 rounded-2xl border border-gray-100 dark:border-navy-800 shadow-sm p-6 space-y-4">
+        <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-xs p-6 space-y-4">
           {/* Header & Actions */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 className="text-base font-bold text-navy-900 dark:text-white">Staff & Employee Master</h3>
-              <p className="text-xs text-navy-400">Manage permanent staff members, designations, and base wages.</p>
+              <h3 className="text-base font-bold text-[#172033]">Staff & Employee Master</h3>
+              <p className="text-xs text-[#6B7280]">Manage permanent staff members, designations, and base wages.</p>
             </div>
 
             <div className="flex items-center gap-2">
               <button
                 onClick={handleExportDirectory}
-                className="px-3.5 py-2 text-xs font-bold rounded-xl bg-white dark:bg-navy-800 text-navy-700 dark:text-navy-200 border border-gray-200 dark:border-navy-700 hover:bg-gray-50 transition flex items-center gap-1.5"
+                className="px-3.5 py-2 text-xs font-bold rounded-xl bg-white text-[#172033] border border-[#E5E7EB] hover:bg-[#FFF0E5] transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
               >
-                <Download className="w-3.5 h-3.5" /> Export CSV
+                <Download className="w-3.5 h-3.5 text-[#F97316]" /> Export CSV
               </button>
 
               <button
@@ -715,7 +745,7 @@ const EmployeeEntry = () => {
                   });
                   setEmpModalOpen(true);
                 }}
-                className="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-orange-600/20"
+                className="px-4 py-2 rounded-xl bg-[#F97316] hover:bg-[#EA580C] text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-[#F97316]/20 cursor-pointer"
               >
                 <Plus className="w-4 h-4" /> Add Employee
               </button>
@@ -723,9 +753,9 @@ const EmployeeEntry = () => {
           </div>
 
           {/* Search & Filter Bar */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-gray-50 dark:bg-navy-800/40 p-3.5 rounded-xl border border-gray-100 dark:border-navy-700/60">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-[#FFF8F1]/60 p-3.5 rounded-xl border border-[#E5E7EB]">
             <div className="relative">
-              <Search className="w-3.5 h-3.5 text-navy-400 absolute left-3 top-3" />
+              <Search className="w-3.5 h-3.5 text-[#6B7280] absolute left-3 top-3" />
               <input
                 type="text"
                 placeholder="Search staff by name or mobile..."
@@ -734,7 +764,7 @@ const EmployeeEntry = () => {
                   setEmpSearch(e.target.value);
                   setEmpPage(1);
                 }}
-                className="w-full pl-8 pr-3 py-2 text-xs rounded-lg border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-900 text-navy-900 dark:text-white outline-none focus:border-orange-500"
+                className="w-full pl-8 pr-3 py-2 text-xs rounded-xl border border-[#E5E7EB] bg-white text-[#172033] outline-none focus:border-[#F97316] shadow-2xs"
               />
             </div>
 
@@ -744,7 +774,7 @@ const EmployeeEntry = () => {
                 setEmpDesigFilter(e.target.value);
                 setEmpPage(1);
               }}
-              className="px-3 py-2 text-xs rounded-lg border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-900 text-navy-900 dark:text-white outline-none"
+              className="px-3 py-2 text-xs rounded-xl border border-[#E5E7EB] bg-white text-[#172033] outline-none focus:border-[#F97316] shadow-2xs font-medium cursor-pointer"
             >
               <option value="ALL">All Designations</option>
               {DESIGNATIONS.map((d) => (
@@ -760,7 +790,7 @@ const EmployeeEntry = () => {
                 setEmpStatusFilter(e.target.value);
                 setEmpPage(1);
               }}
-              className="px-3 py-2 text-xs rounded-lg border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-900 text-navy-900 dark:text-white outline-none"
+              className="px-3 py-2 text-xs rounded-xl border border-[#E5E7EB] bg-white text-[#172033] outline-none focus:border-[#F97316] shadow-2xs font-medium cursor-pointer"
             >
               <option value="ALL">All Statuses</option>
               <option value="Active">Active Only</option>
@@ -770,62 +800,76 @@ const EmployeeEntry = () => {
 
           {/* Directory Table */}
           {loadingEmployees ? (
-            <SkeletonLoader rows={5} />
-          ) : employees.length === 0 ? (
-            <div className="text-center py-12">
-              <Users className="w-10 h-10 text-navy-300 mx-auto mb-2" />
-              <p className="text-sm font-bold text-navy-700 dark:text-navy-300">No employees found</p>
-              <p className="text-xs text-navy-400 mt-1">Try changing filters or add your first staff member.</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto border border-[#E5E7EB] rounded-xl">
               <table className="w-full text-left text-xs">
-                <thead className="bg-gray-50 dark:bg-navy-800/60 text-navy-500 font-semibold uppercase tracking-wider">
+                <thead className="bg-[#FFF8F1] text-[#172033] font-bold uppercase tracking-wider border-b border-[#E5E7EB]">
                   <tr>
-                    <th className="p-3 rounded-l-xl">Staff Member</th>
+                    <th className="p-3">Staff Member</th>
                     <th className="p-3">Designation</th>
                     <th className="p-3">Monthly Base Salary</th>
                     <th className="p-3">Joining Date</th>
                     <th className="p-3">Status</th>
-                    <th className="p-3 text-right rounded-r-xl">Actions</th>
+                    <th className="p-3 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-navy-800">
+                <SkeletonLoader rows={5} columns={6} />
+              </table>
+            </div>
+          ) : employees.length === 0 ? (
+            <div className="text-center py-12">
+              <Users className="w-10 h-10 text-[#9CA3AF] mx-auto mb-2" />
+              <p className="text-sm font-bold text-[#172033]">No employees found</p>
+              <p className="text-xs text-[#6B7280] mt-1">Try changing filters or add your first staff member.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto border border-[#E5E7EB] rounded-xl">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#FFF8F1] text-[#172033] font-bold uppercase tracking-wider border-b border-[#E5E7EB]">
+                  <tr>
+                    <th className="p-3">Staff Member</th>
+                    <th className="p-3">Designation</th>
+                    <th className="p-3">Monthly Base Salary</th>
+                    <th className="p-3">Joining Date</th>
+                    <th className="p-3">Status</th>
+                    <th className="p-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E5E7EB]">
                   {employees.map((emp, idx) => (
-                    <tr key={idx} className="hover:bg-gray-50/50 dark:hover:bg-navy-800/30 transition">
+                    <tr key={idx} className="hover:bg-[#FFF0E5]/30 transition">
                       <td className="p-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-950/50 dark:text-orange-400 flex items-center justify-center font-black text-xs">
+                          <div className="w-8 h-8 rounded-full bg-[#FFF0E5] text-[#F97316] border border-[#FDBA74] flex items-center justify-center font-black text-xs">
                             {emp.name.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <p className="font-bold text-navy-900 dark:text-white">{emp.name}</p>
-                            <p className="text-[11px] text-navy-400 font-mono">{emp.mobile}</p>
+                            <p className="font-bold text-[#172033]">{emp.name}</p>
+                            <p className="text-[11px] text-[#6B7280] font-mono">{emp.mobile}</p>
                           </div>
                         </div>
                       </td>
 
                       <td className="p-3">
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 dark:bg-navy-800 text-navy-700 dark:text-navy-300 border border-gray-200 dark:border-navy-700">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#FFF8F1] text-[#172033] border border-[#E5E7EB]">
                           {emp.designation}
                         </span>
                       </td>
 
-                      <td className="p-3 font-black text-navy-900 dark:text-white">
+                      <td className="p-3 font-black text-[#172033]">
                         ₹{Number(emp.salary).toLocaleString('en-IN')}
                       </td>
 
-                      <td className="p-3 text-navy-500 dark:text-navy-400">
+                      <td className="p-3 text-[#6B7280]">
                         {emp.joiningDate ? new Date(emp.joiningDate).toLocaleDateString('en-IN') : '—'}
                       </td>
 
                       <td className="p-3">
                         <button
                           onClick={() => handleToggleStatus(emp)}
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold transition ${
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold transition cursor-pointer ${
                             emp.status === 'Active'
-                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400'
-                              : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                              : 'bg-gray-100 text-gray-600 border border-gray-200'
                           }`}
                           title="Click to toggle Active/Inactive"
                         >
@@ -837,10 +881,10 @@ const EmployeeEntry = () => {
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             onClick={() => openFullProfile(emp._id)}
-                            className="p-1.5 text-navy-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-navy-800 rounded-lg transition"
+                            className="p-1.5 text-[#6B7280] hover:text-blue-600 hover:bg-blue-50 rounded-lg transition cursor-pointer"
                             title="View Full Profile"
                           >
-                            <Eye className="w-3.5 h-3.5" />
+                            <Eye className="w-4 h-4" />
                           </button>
 
                           <button
@@ -859,10 +903,10 @@ const EmployeeEntry = () => {
                               });
                               setEmpModalOpen(true);
                             }}
-                            className="p-1.5 text-navy-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-navy-800 rounded-lg transition"
+                            className="p-1.5 text-[#6B7280] hover:text-[#F97316] hover:bg-[#FFF0E5] rounded-lg transition cursor-pointer"
                             title="Edit Staff"
                           >
-                            <Edit2 className="w-3.5 h-3.5" />
+                            <Edit2 className="w-4 h-4" />
                           </button>
                         </div>
                       </td>
@@ -891,26 +935,29 @@ const EmployeeEntry = () => {
       {activeTab === 'ATTENDANCE' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Daily Absent Marker Checklist */}
-          <div className="lg:col-span-2 bg-white dark:bg-navy-900 rounded-2xl border border-gray-100 dark:border-navy-800 shadow-sm p-6 space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 dark:border-navy-800 pb-4">
+          <div className="lg:col-span-2 bg-white rounded-2xl border border-[#E5E7EB] shadow-xs p-6 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E5E7EB] pb-4">
               <div>
-                <h3 className="text-base font-bold text-navy-900 dark:text-white">Daily Attendance Checklist</h3>
-                <p className="text-xs text-navy-400">
-                  Staff are considered <strong>Present</strong> by default. Mark absent when an employee is off.
+                <h3 className="text-base font-bold text-[#172033]">Daily Attendance Checklist</h3>
+                <p className="text-xs text-[#6B7280]">
+                  Staff are considered <strong className="text-emerald-700 font-bold">Present</strong> by default. Mark absent when an employee is on leave.
                 </p>
               </div>
 
               {/* Date Selector */}
               <div className="flex items-center gap-2">
-                <input
-                  type="date"
-                  value={attendanceDate}
-                  onChange={(e) => setAttendanceDate(e.target.value)}
-                  className="px-3 py-1.5 text-xs font-bold rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800 text-navy-900 dark:text-white outline-none cursor-pointer"
-                />
+                <div className="flex items-center gap-1.5 bg-[#FFF8F1] border border-[#E5E7EB] px-3 py-1.5 rounded-xl">
+                  <Calendar className="w-3.5 h-3.5 text-[#F97316]" />
+                  <input
+                    type="date"
+                    value={attendanceDate}
+                    onChange={(e) => setAttendanceDate(e.target.value)}
+                    className="bg-transparent text-[#172033] font-bold text-xs outline-none cursor-pointer"
+                  />
+                </div>
                 <button
                   onClick={() => setAttendanceDate(todayDateStr)}
-                  className="px-2.5 py-1.5 text-xs font-semibold rounded-xl bg-gray-100 hover:bg-gray-200 transition"
+                  className="px-3 py-1.5 text-xs font-bold rounded-xl bg-white text-[#172033] border border-[#E5E7EB] hover:bg-[#FFF0E5] transition cursor-pointer shadow-2xs"
                 >
                   Today
                 </button>
@@ -918,47 +965,57 @@ const EmployeeEntry = () => {
             </div>
 
             {/* Staff list for the day */}
-            <div className="divide-y divide-gray-100 dark:divide-navy-800">
+            <div className="divide-y divide-[#E5E7EB]">
               {allActiveEmps.map((emp) => {
                 const isAbsent = attendanceRecords.find(
                   (a) => a.employee?._id === emp._id || a.employee === emp._id
                 );
 
                 return (
-                  <div key={emp._id} className="py-3 flex items-center justify-between">
+                  <div key={emp._id} className="py-3.5 flex items-center justify-between hover:bg-[#FFF0E5]/20 px-2 rounded-xl transition">
                     <div className="flex items-center gap-3">
                       <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
+                        className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs ${
                           isAbsent
-                            ? 'bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400'
-                            : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400'
+                            ? 'bg-rose-50 text-rose-600 border border-rose-200'
+                            : 'bg-emerald-50 text-emerald-600 border border-emerald-200'
                         }`}
                       >
                         {isAbsent ? <UserX className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
                       </div>
                       <div>
-                        <p className="font-bold text-navy-900 dark:text-white">{emp.name}</p>
-                        <p className="text-[10px] text-navy-400 font-mono">
-                          {emp.designation} • ₹{emp.salary}/mo
+                        <p className="font-bold text-[#172033]">{emp.name}</p>
+                        <p className="text-[11px] text-[#6B7280]">
+                          <span className="font-medium text-[#172033]">{emp.designation}</span> • Base: ₹{Number(emp.salary).toLocaleString('en-IN')}/mo
                         </p>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-3">
                       <span
-                        className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
                           isAbsent
-                            ? 'bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400'
-                            : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400'
+                            ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                            : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                         }`}
                       >
-                        {isAbsent ? `❌ Absent (${isAbsent.remarks || 'Off'})` : '✓ Present'}
+                        {isAbsent ? (
+                          <>
+                            <XCircle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                            <span>Absent ({isAbsent.remarks || 'Off'})</span>
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                            <span>Present</span>
+                          </>
+                        )}
                       </span>
 
                       {isAbsent ? (
                         <button
                           onClick={() => handleRemoveAbsent(isAbsent._id)}
-                          className="px-2.5 py-1 text-[11px] font-bold rounded-lg border border-gray-200 text-navy-600 hover:bg-gray-100 transition"
+                          className="px-3 py-1 text-xs font-bold rounded-lg border border-[#E5E7EB] bg-white text-[#172033] hover:bg-gray-50 transition cursor-pointer shadow-2xs"
                           title="Undo absent mark"
                         >
                           Undo
@@ -970,7 +1027,7 @@ const EmployeeEntry = () => {
                             setAbsentForm({ date: attendanceDate, remarks: 'Personal Leave' });
                             setAbsentModalOpen(true);
                           }}
-                          className="px-3 py-1 text-[11px] font-bold rounded-lg bg-red-600 hover:bg-red-700 text-white transition shadow-2xs"
+                          className="px-3 py-1 text-xs font-bold rounded-lg bg-rose-600 hover:bg-rose-700 text-white transition shadow-2xs cursor-pointer"
                         >
                           Mark Absent
                         </button>
@@ -983,29 +1040,29 @@ const EmployeeEntry = () => {
           </div>
 
           {/* Historical Absent Log Stream */}
-          <div className="bg-white dark:bg-navy-900 rounded-2xl border border-gray-100 dark:border-navy-800 shadow-sm p-6 space-y-4">
-            <h3 className="text-base font-bold text-navy-900 dark:text-white">Recent Absent Records</h3>
-            <p className="text-xs text-navy-400">Log of recorded employee absences.</p>
+          <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-xs p-6 space-y-4">
+            <h3 className="text-base font-bold text-[#172033]">Recent Absent Records</h3>
+            <p className="text-xs text-[#6B7280]">Log of recorded employee absences for {attendanceDate}.</p>
 
             {attendanceRecords.length === 0 ? (
-              <div className="text-center py-8 text-xs text-navy-400">
-                No staff marked absent on {attendanceDate}.
+              <div className="text-center py-8 text-xs text-[#9CA3AF] bg-[#FFF8F1]/40 rounded-xl border border-dashed border-[#E5E7EB]">
+                No staff marked absent on this date.
               </div>
             ) : (
               <div className="space-y-2.5">
                 {attendanceRecords.map((a) => (
                   <div
                     key={a._id}
-                    className="p-3 rounded-xl bg-red-50/60 dark:bg-red-950/20 border border-red-100 dark:border-red-900/40 text-xs space-y-1"
+                    className="p-3.5 rounded-xl bg-rose-50/70 border border-rose-100 text-xs space-y-1.5"
                   >
-                    <div className="flex items-center justify-between font-bold text-navy-900 dark:text-white">
+                    <div className="flex items-center justify-between font-bold text-[#172033]">
                       <span>{a.employee?.name || 'Staff Member'}</span>
-                      <span className="text-[10px] text-red-600 uppercase font-mono">Absent</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-200/60 text-rose-800 uppercase font-mono font-bold">Absent</span>
                     </div>
-                    <p className="text-[11px] text-navy-500">{a.remarks || 'No remarks provided'}</p>
-                    <div className="flex items-center justify-between text-[10px] text-navy-400 pt-1 border-t border-red-100/60">
+                    <p className="text-[11px] text-[#6B7280]">{a.remarks || 'No remarks provided'}</p>
+                    <div className="flex items-center justify-between text-[10px] text-[#9CA3AF] pt-1.5 border-t border-rose-200/50">
                       <span>Marked by: {a.enteredBy?.name || 'Manager'}</span>
-                      <span className="font-mono">{a.entryCode}</span>
+                      <span className="font-mono font-bold text-[#6B7280]">{a.entryCode}</span>
                     </div>
                   </div>
                 ))}
@@ -1017,11 +1074,11 @@ const EmployeeEntry = () => {
 
       {/* 5. TAB 3: SALARY ADVANCES */}
       {activeTab === 'ADVANCES' && (
-        <div className="bg-white dark:bg-navy-900 rounded-2xl border border-gray-100 dark:border-navy-800 shadow-sm p-6 space-y-4">
+        <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-xs p-6 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 className="text-base font-bold text-navy-900 dark:text-white">Salary Advance Ledger</h3>
-              <p className="text-xs text-navy-400">Track advances given to employees before monthly payroll.</p>
+              <h3 className="text-base font-bold text-[#172033]">Salary Advance Ledger</h3>
+              <p className="text-xs text-[#6B7280]">Track advances disbursed to permanent employees before payroll.</p>
             </div>
 
             <button
@@ -1034,21 +1091,21 @@ const EmployeeEntry = () => {
                 });
                 setAdvanceModalOpen(true);
               }}
-              className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-amber-600/20"
+              className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-amber-600/20 cursor-pointer"
             >
               <Plus className="w-4 h-4" /> Record Advance
             </button>
           </div>
 
           {/* Filter Bar */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-gray-50 dark:bg-navy-800/40 p-3.5 rounded-xl border border-gray-100 dark:border-navy-700/60">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#FFF8F1]/60 p-3.5 rounded-xl border border-[#E5E7EB]">
             <select
               value={advEmpFilter}
               onChange={(e) => {
                 setAdvEmpFilter(e.target.value);
                 setAdvPage(1);
               }}
-              className="px-3 py-2 text-xs rounded-lg border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-900 text-navy-900 dark:text-white outline-none"
+              className="px-3 py-2 text-xs rounded-xl border border-[#E5E7EB] bg-white text-[#172033] outline-none focus:border-[#F97316] shadow-2xs font-medium cursor-pointer"
             >
               <option value="">All Employees</option>
               {allActiveEmps.map((emp) => (
@@ -1058,49 +1115,67 @@ const EmployeeEntry = () => {
               ))}
             </select>
 
-            <div className="flex items-center justify-end text-xs font-bold text-amber-600">
+            <div className="flex items-center justify-end text-xs font-bold text-amber-700 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200">
               Total Advances Logged: ₹{(summaryCounts?.totalAdvances || 0).toLocaleString('en-IN')}
             </div>
           </div>
 
           {/* Advances Table */}
           {loadingAdvances ? (
-            <SkeletonLoader rows={5} />
-          ) : advances.length === 0 ? (
-            <div className="text-center py-12">
-              <TrendingDown className="w-10 h-10 text-navy-300 mx-auto mb-2" />
-              <p className="text-sm font-bold text-navy-700 dark:text-navy-300">No salary advances recorded</p>
-              <p className="text-xs text-navy-400 mt-1">No advance payments recorded for {selectedMonth}.</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto border border-[#E5E7EB] rounded-xl">
               <table className="w-full text-left text-xs">
-                <thead className="bg-gray-50 dark:bg-navy-800/60 text-navy-500 font-semibold uppercase tracking-wider">
+                <thead className="bg-[#FFF8F1] text-[#172033] font-bold uppercase tracking-wider border-b border-[#E5E7EB]">
                   <tr>
-                    <th className="p-3 rounded-l-xl">Entry Code & Employee</th>
+                    <th className="p-3">Entry Code & Employee</th>
                     <th className="p-3">Advance Date</th>
                     <th className="p-3">Advance Amount</th>
                     <th className="p-3">Remarks / Reason</th>
                     <th className="p-3">Entered By</th>
-                    <th className="p-3 text-right rounded-r-xl">Actions</th>
+                    <th className="p-3 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-navy-800">
+                <SkeletonLoader rows={5} columns={6} />
+              </table>
+            </div>
+          ) : advances.length === 0 ? (
+            <div className="text-center py-12">
+              <TrendingDown className="w-10 h-10 text-[#9CA3AF] mx-auto mb-2" />
+              <p className="text-sm font-bold text-[#172033]">No salary advances recorded</p>
+              <p className="text-xs text-[#6B7280] mt-1">No advance payments recorded for {selectedMonth}.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto border border-[#E5E7EB] rounded-xl">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#FFF8F1] text-[#172033] font-bold uppercase tracking-wider border-b border-[#E5E7EB]">
+                  <tr>
+                    <th className="p-3">Entry Code & Employee</th>
+                    <th className="p-3">Advance Date</th>
+                    <th className="p-3">Advance Amount</th>
+                    <th className="p-3">Remarks / Reason</th>
+                    <th className="p-3">Entered By</th>
+                    <th className="p-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E5E7EB]">
                   {advances.map((adv, idx) => (
-                    <tr key={idx} className="hover:bg-gray-50/50 dark:hover:bg-navy-800/30 transition">
+                    <tr key={idx} className="hover:bg-[#FFF0E5]/30 transition">
                       <td className="p-3">
-                        <div className="font-bold text-navy-900 dark:text-white flex items-center gap-1.5">
-                          <span>{adv.employee?.name || 'Staff Member'}</span>
+                        <div className="font-bold text-[#172033] flex items-center gap-1.5">
+                          <span>{adv.employeeId?.name || 'Unknown Staff'}</span>
                           {adv.isEdited && (
-                            <span className="px-1.5 py-0.2 rounded bg-amber-100 text-amber-700 text-[10px] font-bold">
+                            <button
+                              onClick={() => openHistory(adv)}
+                              className="px-1.5 py-0.2 rounded bg-amber-100 text-amber-700 text-[10px] font-bold hover:underline"
+                              title="Click to view correction log"
+                            >
                               Edited
-                            </span>
+                            </button>
                           )}
                         </div>
-                        <span className="text-[10px] text-navy-400 font-mono">{adv.entryCode}</span>
+                        <span className="text-[10px] text-[#6B7280] font-mono">{adv.entryCode}</span>
                       </td>
 
-                      <td className="p-3 text-navy-700 dark:text-navy-300 font-medium">
+                      <td className="p-3 text-[#374151] font-medium">
                         {new Date(adv.date).toLocaleDateString('en-IN', {
                           day: '2-digit',
                           month: 'short',
@@ -1108,30 +1183,37 @@ const EmployeeEntry = () => {
                         })}
                       </td>
 
-                      <td className="p-3 text-sm font-black text-amber-600">
-                        ₹{Number(adv.amount).toLocaleString('en-IN')}
+                      <td className="p-3 font-bold text-amber-700">
+                        ₹{adv.amount.toLocaleString('en-IN')}
                       </td>
 
-                      <td className="p-3 text-navy-600 dark:text-navy-400">{adv.remarks || '—'}</td>
+                      <td className="p-3 text-[#6B7280] max-w-xs truncate" title={adv.remarks}>
+                        {adv.remarks || '-'}
+                      </td>
 
-                      <td className="p-3 text-navy-500">
-                        <span className="font-semibold">{adv.enteredBy?.name || 'Manager'}</span>
+                      <td className="p-3 text-[#6B7280]">
+                        {adv.enteredBy?.name || 'System'}
                       </td>
 
                       <td className="p-3 text-right">
-                        {adv.isEdited && (
+                        <div className="flex items-center justify-end gap-1.5">
                           <button
-                            onClick={() => {
-                              setSelectedHistory(adv.editHistory || []);
-                              setHistoryTitle(`Advance [${adv.entryCode}] Correction Log`);
-                              setHistoryModalOpen(true);
-                            }}
-                            className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg"
-                            title="Audit Log"
+                            onClick={() => openEditAdvanceModal(adv)}
+                            className="p-1.5 text-[#6B7280] hover:text-[#F97316] hover:bg-[#FFF0E5] rounded-lg transition"
+                            title="Edit Advance"
                           >
-                            <HistoryIcon className="w-3.5 h-3.5" />
+                            <Edit2 className="w-3.5 h-3.5" />
                           </button>
-                        )}
+                          {adv.isEdited && (
+                            <button
+                              onClick={() => openHistory(adv)}
+                              className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition"
+                              title="Audit Log"
+                            >
+                              <History className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -1156,82 +1238,98 @@ const EmployeeEntry = () => {
 
       {/* 6. TAB 4: MONTHLY SALARY SHEET & CALCULATION */}
       {activeTab === 'SALARY_SHEET' && (
-        <div className="bg-white dark:bg-navy-900 rounded-2xl border border-gray-100 dark:border-navy-800 shadow-sm p-6 space-y-4">
+        <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-xs p-6 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 className="text-base font-bold text-navy-900 dark:text-white">
+              <h3 className="text-base font-bold text-[#172033]">
                 Monthly Salary Sheet ({selectedMonth})
               </h3>
-              <p className="text-xs text-navy-400">
-                Formula: Base Salary - Absent Deduction - Advance Deductions = Net Payable
+              <p className="text-xs text-[#6B7280]">
+                Formula: <span className="font-mono font-medium text-[#172033]">Base Salary - Absent Deduction - Advance Deductions = Net Payable</span>
               </p>
             </div>
 
             <div className="flex items-center gap-2">
               <button
                 onClick={handleExportSalarySheet}
-                className="px-3.5 py-2 text-xs font-bold rounded-xl bg-white dark:bg-navy-800 text-navy-700 dark:text-navy-200 border border-gray-200 dark:border-navy-700 hover:bg-gray-50 transition flex items-center gap-1.5"
+                className="px-3.5 py-2 text-xs font-bold rounded-xl bg-white text-[#172033] border border-[#E5E7EB] hover:bg-[#FFF0E5] transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
               >
-                <Download className="w-3.5 h-3.5" /> Export Salary Sheet
+                <Download className="w-3.5 h-3.5 text-[#F97316]" /> Export Salary Sheet
               </button>
 
               <button
                 onClick={fetchSalarySheet}
-                className="p-2 rounded-xl border border-gray-200 dark:border-navy-700 text-navy-400 hover:text-navy-700"
+                className="p-2 rounded-xl border border-[#E5E7EB] text-[#6B7280] hover:text-[#172033] hover:bg-[#FFF0E5] transition cursor-pointer shadow-2xs"
                 title="Refresh Sheet"
               >
-                <RefreshCw className={`w-4 h-4 ${loadingSalarySheet ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-4 h-4 text-[#172033] ${loadingSalarySheet ? 'animate-spin text-[#F97316]' : ''}`} />
               </button>
             </div>
           </div>
 
           {/* Sheet Table */}
           {loadingSalarySheet ? (
-            <SkeletonLoader rows={6} />
+            <div className="overflow-x-auto border border-[#E5E7EB] rounded-xl">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#FFF8F1] text-[#172033] font-bold uppercase tracking-wider border-b border-[#E5E7EB]">
+                  <tr>
+                    <th className="p-3">Staff Member</th>
+                    <th className="p-3">Base Salary</th>
+                    <th className="p-3">Absent Days</th>
+                    <th className="p-3">Absent Deduction</th>
+                    <th className="p-3">Advance Deduction</th>
+                    <th className="p-3 font-extrabold text-emerald-800">Net Payable</th>
+                    <th className="p-3 text-center">Status</th>
+                    <th className="p-3 text-right">Disburse</th>
+                  </tr>
+                </thead>
+                <SkeletonLoader rows={6} columns={8} />
+              </table>
+            </div>
           ) : !salarySheetData?.salarySheet?.length ? (
-            <div className="text-center py-12 text-navy-400 text-xs">
+            <div className="text-center py-12 text-[#9CA3AF] text-xs bg-[#FFF8F1]/40 rounded-xl border border-dashed border-[#E5E7EB]">
               No active staff found to calculate salary for {selectedMonth}.
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto border border-[#E5E7EB] rounded-xl">
               <table className="w-full text-left text-xs">
-                <thead className="bg-gray-50 dark:bg-navy-800/60 text-navy-500 font-semibold uppercase tracking-wider">
+                <thead className="bg-[#FFF8F1] text-[#172033] font-bold uppercase tracking-wider border-b border-[#E5E7EB]">
                   <tr>
-                    <th className="p-3 rounded-l-xl">Staff Member</th>
+                    <th className="p-3">Staff Member</th>
                     <th className="p-3">Base Salary</th>
                     <th className="p-3">Absent Days</th>
                     <th className="p-3">Absent Deduction</th>
                     <th className="p-3">Advances Deducted</th>
                     <th className="p-3">Final Net Payable</th>
                     <th className="p-3">Payout Status</th>
-                    <th className="p-3 text-right rounded-r-xl">Action</th>
+                    <th className="p-3 text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-navy-800">
+                <tbody className="divide-y divide-[#E5E7EB]">
                   {salarySheetData.salarySheet.map((row, idx) => {
                     const isPaid = row.status === 'PAID';
                     return (
-                      <tr key={idx} className="hover:bg-gray-50/50 dark:hover:bg-navy-800/30 transition">
+                      <tr key={idx} className="hover:bg-[#FFF0E5]/30 transition">
                         <td className="p-3">
-                          <p className="font-bold text-navy-900 dark:text-white">{row.employee.name}</p>
-                          <p className="text-[10px] text-navy-400 font-mono">{row.employee.designation}</p>
+                          <p className="font-bold text-[#172033]">{row.employee.name}</p>
+                          <p className="text-[11px] text-[#6B7280] font-mono">{row.employee.designation}</p>
                         </td>
 
-                        <td className="p-3 font-bold text-navy-800 dark:text-navy-100">
+                        <td className="p-3 font-bold text-[#172033]">
                           ₹{Number(row.monthlySalary).toLocaleString('en-IN')}
                         </td>
 
                         <td className="p-3">
                           <span
-                            className={`px-2 py-0.5 rounded font-bold ${
-                              row.absentDays > 0 ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'
+                            className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                              row.absentDays > 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-gray-100 text-gray-600'
                             }`}
                           >
                             {row.absentDays} day(s)
                           </span>
                         </td>
 
-                        <td className="p-3 text-red-600 font-bold">
+                        <td className="p-3 text-rose-600 font-bold">
                           -₹{Number(row.absentDeduction).toLocaleString('en-IN')}
                         </td>
 
@@ -1240,7 +1338,7 @@ const EmployeeEntry = () => {
                         </td>
 
                         <td className="p-3">
-                          <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">
+                          <span className="text-sm font-black text-emerald-600">
                             ₹{Number(row.finalPayable).toLocaleString('en-IN')}
                           </span>
                         </td>
@@ -1249,8 +1347,8 @@ const EmployeeEntry = () => {
                           <span
                             className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
                               isPaid
-                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400'
-                                : 'bg-orange-100 text-orange-700 dark:bg-orange-950/40 dark:text-orange-400'
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                : 'bg-orange-50 text-[#F97316] border border-orange-200'
                             }`}
                           >
                             {row.status}
@@ -1259,7 +1357,7 @@ const EmployeeEntry = () => {
 
                         <td className="p-3 text-right">
                           {isPaid ? (
-                            <span className="text-[10px] text-emerald-600 font-bold">
+                            <span className="text-[11px] text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 inline-block">
                               ✓ Paid on{' '}
                               {new Date(row.paymentDetails?.paymentDate).toLocaleDateString('en-IN', {
                                 day: '2-digit',
@@ -1269,7 +1367,7 @@ const EmployeeEntry = () => {
                           ) : (
                             <button
                               onClick={() => openPaySalaryModal(row)}
-                              className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-xs"
+                              className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-xs cursor-pointer"
                             >
                               Pay Salary
                             </button>
@@ -1287,50 +1385,66 @@ const EmployeeEntry = () => {
 
       {/* 7. TAB 5: SALARY PAYMENT LEDGER */}
       {activeTab === 'SALARY_LEDGER' && (
-        <div className="bg-white dark:bg-navy-900 rounded-2xl border border-gray-100 dark:border-navy-800 shadow-sm p-6 space-y-4">
+        <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-xs p-6 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 className="text-base font-bold text-navy-900 dark:text-white">Salary Payment Ledger</h3>
-              <p className="text-xs text-navy-400">Historical records of completed salary disbursements.</p>
+              <h3 className="text-base font-bold text-[#172033]">Salary Payment Ledger</h3>
+              <p className="text-xs text-[#6B7280]">Historical records of completed salary disbursements.</p>
             </div>
           </div>
 
           {loadingPayments ? (
-            <SkeletonLoader rows={5} />
+            <div className="overflow-x-auto border border-[#E5E7EB] rounded-xl">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#FFF8F1] text-[#172033] font-bold uppercase tracking-wider border-b border-[#E5E7EB]">
+                  <tr>
+                    <th className="p-3">Voucher & Staff</th>
+                    <th className="p-3">Salary Month</th>
+                    <th className="p-3">Base Wage</th>
+                    <th className="p-3">Deductions</th>
+                    <th className="p-3">Net Paid</th>
+                    <th className="p-3">Payment Mode</th>
+                    <th className="p-3">Disbursed Date</th>
+                    <th className="p-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <SkeletonLoader rows={5} columns={8} />
+              </table>
+            </div>
           ) : payments.length === 0 ? (
             <div className="text-center py-12">
-              <CreditCard className="w-10 h-10 text-navy-300 mx-auto mb-2" />
-              <p className="text-sm font-bold text-navy-700 dark:text-navy-300">No salary payment records</p>
-              <p className="text-xs text-navy-400 mt-1">No completed salary vouchers found for {selectedMonth}.</p>
+              <CreditCard className="w-10 h-10 text-[#9CA3AF] mx-auto mb-2" />
+              <p className="text-sm font-bold text-[#172033]">No salary payment records</p>
+              <p className="text-xs text-[#6B7280] mt-1">No completed salary vouchers found for {selectedMonth}.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto border border-[#E5E7EB] rounded-xl">
               <table className="w-full text-left text-xs">
-                <thead className="bg-gray-50 dark:bg-navy-800/60 text-navy-500 font-semibold uppercase tracking-wider">
+                <thead className="bg-[#FFF8F1] text-[#172033] font-bold uppercase tracking-wider border-b border-[#E5E7EB]">
                   <tr>
-                    <th className="p-3 rounded-l-xl">Voucher & Staff</th>
+                    <th className="p-3">Voucher & Staff</th>
                     <th className="p-3">Salary Month</th>
                     <th className="p-3">Base Salary</th>
                     <th className="p-3">Deductions</th>
                     <th className="p-3">Paid Net Amount</th>
                     <th className="p-3">Payment Mode</th>
                     <th className="p-3">Payment Date</th>
-                    <th className="p-3 text-right rounded-r-xl">Paid By</th>
+                    <th className="p-3 text-right">Paid By</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-navy-800">
+                <tbody className="divide-y divide-[#E5E7EB]">
                   {payments.map((p, idx) => (
-                    <tr key={idx} className="hover:bg-gray-50/50 dark:hover:bg-navy-800/30 transition">
+                    <tr key={idx} className="hover:bg-[#FFF0E5]/30 transition">
                       <td className="p-3">
-                        <p className="font-bold text-navy-900 dark:text-white">{p.employee?.name || 'Staff'}</p>
-                        <span className="text-[10px] text-navy-400 font-mono">{p.entryCode}</span>
+                        <p className="font-bold text-[#172033]">{p.employee?.name || 'Staff'}</p>
+                        <span className="text-[10px] text-[#6B7280] font-mono">{p.entryCode}</span>
                       </td>
 
-                      <td className="p-3 font-semibold">{p.salaryMonth}</td>
+                      <td className="p-3 font-semibold text-[#172033]">{p.salaryMonth}</td>
 
-                      <td className="p-3">₹{Number(p.monthlySalary).toLocaleString('en-IN')}</td>
+                      <td className="p-3 text-[#172033] font-medium">₹{Number(p.monthlySalary).toLocaleString('en-IN')}</td>
 
-                      <td className="p-3 text-[11px] text-red-600">
+                      <td className="p-3 text-[11px] text-rose-600 font-medium">
                         Absent: -₹{p.absentDeduction} | Adv: -₹{p.advanceDeduction}
                       </td>
 
@@ -1339,10 +1453,12 @@ const EmployeeEntry = () => {
                       </td>
 
                       <td className="p-3">
-                        <span className="px-2 py-0.5 rounded bg-gray-100 font-semibold">{p.paymentMode}</span>
+                        <span className="px-2 py-0.5 rounded-full bg-[#FFF8F1] text-[#172033] border border-[#E5E7EB] font-semibold text-[11px]">
+                          {p.paymentMode}
+                        </span>
                       </td>
 
-                      <td className="p-3 text-navy-500">
+                      <td className="p-3 text-[#6B7280]">
                         {new Date(p.paymentDate).toLocaleDateString('en-IN', {
                           day: '2-digit',
                           month: 'short',
@@ -1350,7 +1466,7 @@ const EmployeeEntry = () => {
                         })}
                       </td>
 
-                      <td className="p-3 text-right font-semibold text-navy-700 dark:text-navy-300">
+                      <td className="p-3 text-right font-semibold text-[#172033]">
                         {p.paidBy?.name || 'Manager'}
                       </td>
                     </tr>
@@ -1376,13 +1492,19 @@ const EmployeeEntry = () => {
 
       {/* 8. MODAL: ADD / EDIT EMPLOYEE */}
       {empModalOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-navy-900 rounded-2xl max-w-lg w-full border border-gray-100 dark:border-navy-800 shadow-2xl overflow-hidden animate-fadeIn">
-            <div className="p-4 border-b border-gray-100 dark:border-navy-800 flex items-center justify-between bg-orange-50/50 dark:bg-navy-800">
-              <h3 className="text-base font-bold text-navy-900 dark:text-white">
-                {editingEmp ? 'Edit Employee' : 'Add New Staff Member'}
-              </h3>
-              <button onClick={() => setEmpModalOpen(false)} className="p-1.5 text-navy-400 hover:text-navy-700">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-200">
+          <div className="bg-white rounded-2xl max-w-lg w-full border border-[#E5E7EB] shadow-2xl overflow-hidden animate-fadeIn">
+            <div className="p-4 border-b border-[#E5E7EB] flex items-center justify-between bg-[#FFF8F1]">
+              <div className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-[#F97316]" />
+                <h3 className="text-base font-bold text-[#172033]">
+                  {editingEmp ? 'Edit Employee Details' : 'Add New Staff Member'}
+                </h3>
+              </div>
+              <button
+                onClick={() => setEmpModalOpen(false)}
+                className="p-1.5 text-[#6B7280] hover:text-[#172033] hover:bg-[#FFF0E5] rounded-lg transition cursor-pointer"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -1390,19 +1512,19 @@ const EmployeeEntry = () => {
             <form onSubmit={handleSaveEmployee} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-navy-800 dark:text-navy-200 mb-1">Full Name *</label>
+                  <label className="block text-xs font-bold text-[#172033] mb-1">Full Name *</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Rahul Sharma"
                     value={empForm.name}
                     onChange={(e) => setEmpForm({ ...empForm, name: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#E5E7EB] bg-[#FFF8F1]/50 text-[#172033] outline-none focus:border-[#F97316] font-medium"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-navy-800 dark:text-navy-200 mb-1">
+                  <label className="block text-xs font-bold text-[#172033] mb-1">
                     Mobile Number (10 Digits) *
                   </label>
                   <input
@@ -1412,18 +1534,18 @@ const EmployeeEntry = () => {
                     placeholder="e.g. 9876543210"
                     value={empForm.mobile}
                     onChange={(e) => setEmpForm({ ...empForm, mobile: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#E5E7EB] bg-[#FFF8F1]/50 text-[#172033] outline-none focus:border-[#F97316] font-medium"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-navy-800 dark:text-navy-200 mb-1">Designation *</label>
+                  <label className="block text-xs font-bold text-[#172033] mb-1">Designation *</label>
                   <select
                     value={empForm.designation}
                     onChange={(e) => setEmpForm({ ...empForm, designation: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#E5E7EB] bg-[#FFF8F1]/50 text-[#172033] outline-none focus:border-[#F97316] font-medium cursor-pointer"
                   >
                     {DESIGNATIONS.map((d) => (
                       <option key={d} value={d}>
@@ -1434,7 +1556,7 @@ const EmployeeEntry = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-navy-800 dark:text-navy-200 mb-1">
+                  <label className="block text-xs font-bold text-[#172033] mb-1">
                     Monthly Base Salary (₹) *
                   </label>
                   <input
@@ -1445,28 +1567,28 @@ const EmployeeEntry = () => {
                     placeholder="e.g. 15000"
                     value={empForm.salary}
                     onChange={(e) => setEmpForm({ ...empForm, salary: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800 font-bold"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#E5E7EB] bg-[#FFF8F1]/50 text-[#172033] outline-none focus:border-[#F97316] font-bold"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-navy-800 dark:text-navy-200 mb-1">Joining Date</label>
+                  <label className="block text-xs font-bold text-[#172033] mb-1">Joining Date</label>
                   <input
                     type="date"
                     value={empForm.joiningDate}
                     onChange={(e) => setEmpForm({ ...empForm, joiningDate: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#E5E7EB] bg-[#FFF8F1]/50 text-[#172033] outline-none focus:border-[#F97316] font-medium cursor-pointer"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-navy-800 dark:text-navy-200 mb-1">Status</label>
+                  <label className="block text-xs font-bold text-[#172033] mb-1">Status</label>
                   <select
                     value={empForm.status}
                     onChange={(e) => setEmpForm({ ...empForm, status: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#E5E7EB] bg-[#FFF8F1]/50 text-[#172033] outline-none focus:border-[#F97316] font-medium cursor-pointer"
                   >
                     <option value="Active">Active</option>
                     <option value="Inactive">Inactive</option>
@@ -1475,28 +1597,28 @@ const EmployeeEntry = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-navy-800 dark:text-navy-200 mb-1">Remarks</label>
+                <label className="block text-xs font-bold text-[#172033] mb-1">Remarks</label>
                 <input
                   type="text"
                   placeholder="Optional staff notes..."
                   value={empForm.remarks}
                   onChange={(e) => setEmpForm({ ...empForm, remarks: e.target.value })}
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#E5E7EB] bg-[#FFF8F1]/50 text-[#172033] outline-none focus:border-[#F97316]"
                 />
               </div>
 
-              <div className="pt-3 border-t border-gray-100 dark:border-navy-800 flex justify-end gap-2">
+              <div className="pt-3 border-t border-[#E5E7EB] flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setEmpModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold rounded-xl text-navy-600 hover:bg-gray-50"
+                  className="px-4 py-2 text-xs font-bold rounded-xl text-[#6B7280] hover:bg-[#FFF0E5] transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 text-xs font-bold rounded-xl bg-orange-600 hover:bg-orange-700 text-white transition shadow-sm"
+                  className="px-5 py-2 text-xs font-bold rounded-xl bg-[#F97316] hover:bg-[#EA580C] text-white transition shadow-md shadow-[#F97316]/20 cursor-pointer"
                 >
                   {submitting ? 'Saving...' : editingEmp ? 'Update Employee' : 'Add Employee'}
                 </button>
@@ -1508,34 +1630,37 @@ const EmployeeEntry = () => {
 
       {/* 9. MODAL: MARK ABSENT */}
       {absentModalOpen && selectedEmpForAbsent && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-navy-900 rounded-2xl max-w-md w-full border border-red-200 dark:border-red-900 shadow-2xl overflow-hidden animate-fadeIn">
-            <div className="p-4 border-b border-gray-100 dark:border-navy-800 flex items-center justify-between bg-red-50/50 dark:bg-red-950/30">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-200">
+          <div className="bg-white rounded-2xl max-w-md w-full border border-rose-200 shadow-2xl overflow-hidden animate-fadeIn">
+            <div className="p-4 border-b border-[#E5E7EB] flex items-center justify-between bg-rose-50/70">
               <div className="flex items-center gap-2">
-                <UserX className="w-5 h-5 text-red-600" />
-                <h3 className="text-base font-bold text-navy-900 dark:text-white">
+                <UserX className="w-5 h-5 text-rose-600" />
+                <h3 className="text-base font-bold text-[#172033]">
                   Mark Absent: {selectedEmpForAbsent.name}
                 </h3>
               </div>
-              <button onClick={() => setAbsentModalOpen(false)} className="p-1.5 text-navy-400 hover:text-navy-700">
+              <button
+                onClick={() => setAbsentModalOpen(false)}
+                className="p-1.5 text-[#6B7280] hover:text-[#172033] rounded-lg transition cursor-pointer"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleMarkAbsentSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-navy-800 dark:text-navy-200 mb-1">Absent Date *</label>
+                <label className="block text-xs font-bold text-[#172033] mb-1">Absent Date *</label>
                 <input
                   type="date"
                   required
                   value={absentForm.date}
                   onChange={(e) => setAbsentForm({ ...absentForm, date: e.target.value })}
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#E5E7EB] bg-[#FFF8F1]/50 text-[#172033] outline-none focus:border-rose-500 font-medium cursor-pointer"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-navy-800 dark:text-navy-200 mb-1">
+                <label className="block text-xs font-bold text-[#172033] mb-1">
                   Reason / Remarks *
                 </label>
                 <input
@@ -1544,22 +1669,22 @@ const EmployeeEntry = () => {
                   placeholder="e.g. Personal Work, Sick Leave, Family Emergency"
                   value={absentForm.remarks}
                   onChange={(e) => setAbsentForm({ ...absentForm, remarks: e.target.value })}
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#E5E7EB] bg-[#FFF8F1]/50 text-[#172033] outline-none focus:border-rose-500"
                 />
               </div>
 
-              <div className="pt-3 border-t border-gray-100 dark:border-navy-800 flex justify-end gap-2">
+              <div className="pt-3 border-t border-[#E5E7EB] flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setAbsentModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold rounded-xl text-navy-600 hover:bg-gray-50"
+                  className="px-4 py-2 text-xs font-bold rounded-xl text-[#6B7280] hover:bg-gray-100 transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 text-xs font-bold rounded-xl bg-red-600 hover:bg-red-700 text-white transition shadow-sm"
+                  className="px-5 py-2 text-xs font-bold rounded-xl bg-rose-600 hover:bg-rose-700 text-white transition shadow-sm cursor-pointer"
                 >
                   {submitting ? 'Recording...' : 'Confirm Absent Mark'}
                 </button>
@@ -1571,14 +1696,17 @@ const EmployeeEntry = () => {
 
       {/* 10. MODAL: RECORD SALARY ADVANCE */}
       {advanceModalOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-navy-900 rounded-2xl max-w-md w-full border border-gray-100 dark:border-navy-800 shadow-2xl overflow-hidden animate-fadeIn">
-            <div className="p-4 border-b border-gray-100 dark:border-navy-800 flex items-center justify-between bg-amber-50/50 dark:bg-navy-800">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-200">
+          <div className="bg-white rounded-2xl max-w-md w-full border border-[#E5E7EB] shadow-2xl overflow-hidden animate-fadeIn">
+            <div className="p-4 border-b border-[#E5E7EB] flex items-center justify-between bg-amber-50/70">
               <div className="flex items-center gap-2">
                 <TrendingDown className="w-5 h-5 text-amber-600" />
-                <h3 className="text-base font-bold text-navy-900 dark:text-white">Record Salary Advance</h3>
+                <h3 className="text-base font-bold text-[#172033]">Record Salary Advance</h3>
               </div>
-              <button onClick={() => setAdvanceModalOpen(false)} className="p-1.5 text-navy-400 hover:text-navy-700">
+              <button
+                onClick={() => setAdvanceModalOpen(false)}
+                className="p-1.5 text-[#6B7280] hover:text-[#172033] rounded-lg transition cursor-pointer"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -1591,14 +1719,14 @@ const EmployeeEntry = () => {
               className="p-6 space-y-4"
             >
               <div>
-                <label className="block text-xs font-bold text-navy-800 dark:text-navy-200 mb-1">
+                <label className="block text-xs font-bold text-[#172033] mb-1">
                   Select Employee *
                 </label>
                 <select
                   required
                   value={advanceForm.employeeId}
                   onChange={(e) => setAdvanceForm({ ...advanceForm, employeeId: e.target.value })}
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800 font-bold"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#E5E7EB] bg-[#FFF8F1]/50 text-[#172033] outline-none focus:border-amber-500 font-bold cursor-pointer"
                 >
                   <option value="">-- Choose Employee --</option>
                   {allActiveEmps.map((emp) => (
@@ -1611,7 +1739,7 @@ const EmployeeEntry = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-navy-800 dark:text-navy-200 mb-1">
+                  <label className="block text-xs font-bold text-[#172033] mb-1">
                     Advance Amount (₹) *
                   </label>
                   <input
@@ -1622,12 +1750,12 @@ const EmployeeEntry = () => {
                     placeholder="e.g. 2000"
                     value={advanceForm.amount}
                     onChange={(e) => setAdvanceForm({ ...advanceForm, amount: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800 font-bold"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#E5E7EB] bg-[#FFF8F1]/50 text-[#172033] outline-none focus:border-amber-500 font-bold"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-navy-800 dark:text-navy-200 mb-1">
+                  <label className="block text-xs font-bold text-[#172033] mb-1">
                     Advance Date *
                   </label>
                   <input
@@ -1635,27 +1763,27 @@ const EmployeeEntry = () => {
                     required
                     value={advanceForm.date}
                     onChange={(e) => setAdvanceForm({ ...advanceForm, date: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#E5E7EB] bg-[#FFF8F1]/50 text-[#172033] outline-none focus:border-amber-500 font-medium cursor-pointer"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-navy-800 dark:text-navy-200 mb-1">Remarks</label>
+                <label className="block text-xs font-bold text-[#172033] mb-1">Remarks</label>
                 <input
                   type="text"
                   placeholder="e.g. Personal requirement"
                   value={advanceForm.remarks}
                   onChange={(e) => setAdvanceForm({ ...advanceForm, remarks: e.target.value })}
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#E5E7EB] bg-[#FFF8F1]/50 text-[#172033] outline-none focus:border-amber-500"
                 />
               </div>
 
-              <div className="pt-3 border-t border-gray-100 dark:border-navy-800 flex justify-end gap-2">
+              <div className="pt-3 border-t border-[#E5E7EB] flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setAdvanceModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold rounded-xl text-navy-600 hover:bg-gray-50"
+                  className="px-4 py-2 text-xs font-bold rounded-xl text-[#6B7280] hover:bg-gray-100 transition cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -1663,14 +1791,14 @@ const EmployeeEntry = () => {
                   type="button"
                   disabled={submitting}
                   onClick={() => handleSaveAdvance(true)}
-                  className="px-4 py-2 text-xs font-bold rounded-xl border border-amber-600 text-amber-600 hover:bg-amber-50 transition"
+                  className="px-4 py-2 text-xs font-bold rounded-xl border border-amber-600 text-amber-700 hover:bg-amber-50 transition cursor-pointer"
                 >
                   Save & Add Another
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 text-xs font-bold rounded-xl bg-amber-600 hover:bg-amber-700 text-white transition shadow-sm"
+                  className="px-5 py-2 text-xs font-bold rounded-xl bg-amber-600 hover:bg-amber-700 text-white transition shadow-sm cursor-pointer"
                 >
                   {submitting ? 'Saving...' : 'Save Advance'}
                 </button>
@@ -1682,38 +1810,41 @@ const EmployeeEntry = () => {
 
       {/* 11. MODAL: PAY SALARY */}
       {payModalOpen && selectedSalaryRow && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-navy-900 rounded-2xl max-w-lg w-full border border-emerald-200 dark:border-emerald-900 shadow-2xl overflow-hidden animate-fadeIn">
-            <div className="p-4 border-b border-gray-100 dark:border-navy-800 flex items-center justify-between bg-emerald-50/50 dark:bg-emerald-950/30">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-200">
+          <div className="bg-white rounded-2xl max-w-lg w-full border border-emerald-200 shadow-2xl overflow-hidden animate-fadeIn">
+            <div className="p-4 border-b border-[#E5E7EB] flex items-center justify-between bg-emerald-50/70">
               <div>
-                <h3 className="text-base font-bold text-navy-900 dark:text-white">
+                <h3 className="text-base font-bold text-[#172033]">
                   Pay Salary: {selectedSalaryRow.employee.name}
                 </h3>
-                <p className="text-xs text-navy-400">Salary Payout for {selectedSalaryRow.salaryMonth}</p>
+                <p className="text-xs text-[#6B7280]">Salary Payout for {selectedSalaryRow.salaryMonth}</p>
               </div>
-              <button onClick={() => setPayModalOpen(false)} className="p-1.5 text-navy-400 hover:text-navy-700">
+              <button
+                onClick={() => setPayModalOpen(false)}
+                className="p-1.5 text-[#6B7280] hover:text-[#172033] rounded-lg transition cursor-pointer"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handlePaySalarySubmit} className="p-6 space-y-4">
               {/* Formula Breakdown Card */}
-              <div className="bg-gray-50 dark:bg-navy-800 p-3.5 rounded-xl border border-gray-200 dark:border-navy-700 text-xs space-y-2">
+              <div className="bg-[#FFF8F1]/70 p-4 rounded-xl border border-[#E5E7EB] text-xs space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-navy-500">Base Monthly Salary:</span>
-                  <span className="font-bold text-navy-900 dark:text-white">
+                  <span className="text-[#6B7280]">Base Monthly Salary:</span>
+                  <span className="font-bold text-[#172033]">
                     ₹{selectedSalaryRow.monthlySalary.toLocaleString('en-IN')}
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-red-600">
+                <div className="flex items-center justify-between text-rose-600 font-medium">
                   <span>Absent Deduction ({selectedSalaryRow.absentDays} days):</span>
                   <span>-₹{selectedSalaryRow.absentDeduction.toLocaleString('en-IN')}</span>
                 </div>
-                <div className="flex items-center justify-between text-amber-600">
+                <div className="flex items-center justify-between text-amber-600 font-medium">
                   <span>Total Advance Deducted:</span>
                   <span>-₹{selectedSalaryRow.advanceDeduction.toLocaleString('en-IN')}</span>
                 </div>
-                <div className="pt-2 border-t border-gray-200 dark:border-navy-700 flex items-center justify-between font-black text-sm text-emerald-600">
+                <div className="pt-2 border-t border-[#E5E7EB] flex items-center justify-between font-black text-sm text-emerald-600">
                   <span>Calculated Net Payable:</span>
                   <span>₹{selectedSalaryRow.finalPayable.toLocaleString('en-IN')}</span>
                 </div>
@@ -1721,7 +1852,7 @@ const EmployeeEntry = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-navy-800 dark:text-navy-200 mb-1">
+                  <label className="block text-xs font-bold text-[#172033] mb-1">
                     Actual Paid Amount (₹) *
                   </label>
                   <input
@@ -1731,18 +1862,18 @@ const EmployeeEntry = () => {
                     required
                     value={payForm.paidAmount}
                     onChange={(e) => setPayForm({ ...payForm, paidAmount: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800 font-bold"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#E5E7EB] bg-white text-[#172033] outline-none focus:border-emerald-500 font-bold"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-navy-800 dark:text-navy-200 mb-1">
+                  <label className="block text-xs font-bold text-[#172033] mb-1">
                     Payment Mode *
                   </label>
                   <select
                     value={payForm.paymentMode}
                     onChange={(e) => setPayForm({ ...payForm, paymentMode: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#E5E7EB] bg-white text-[#172033] outline-none focus:border-emerald-500 font-semibold cursor-pointer"
                   >
                     {PAYMENT_MODES.map((m) => (
                       <option key={m} value={m}>
@@ -1754,7 +1885,7 @@ const EmployeeEntry = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-navy-800 dark:text-navy-200 mb-1">
+                <label className="block text-xs font-bold text-[#172033] mb-1">
                   Disbursement Date *
                 </label>
                 <input
@@ -1762,34 +1893,35 @@ const EmployeeEntry = () => {
                   required
                   value={payForm.paymentDate}
                   onChange={(e) => setPayForm({ ...payForm, paymentDate: e.target.value })}
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#E5E7EB] bg-white text-[#172033] outline-none focus:border-emerald-500 font-medium cursor-pointer"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-navy-800 dark:text-navy-200 mb-1">
+                <label className="block text-xs font-bold text-[#172033] mb-1">
                   Payment Remarks
                 </label>
                 <input
                   type="text"
+                  placeholder="Optional voucher remarks..."
                   value={payForm.remarks}
                   onChange={(e) => setPayForm({ ...payForm, remarks: e.target.value })}
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#E5E7EB] bg-white text-[#172033] outline-none focus:border-emerald-500"
                 />
               </div>
 
-              <div className="pt-3 border-t border-gray-100 dark:border-navy-800 flex justify-end gap-2">
+              <div className="pt-3 border-t border-[#E5E7EB] flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setPayModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold rounded-xl text-navy-600 hover:bg-gray-50"
+                  className="px-4 py-2 text-xs font-bold rounded-xl text-[#6B7280] hover:bg-gray-100 transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition shadow-sm"
+                  className="px-5 py-2 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition shadow-md shadow-emerald-600/20 cursor-pointer"
                 >
                   {submitting ? 'Processing...' : 'Confirm & Disburse Salary'}
                 </button>
@@ -1801,47 +1933,50 @@ const EmployeeEntry = () => {
 
       {/* 12. MODAL: EMPLOYEE FULL PROFILE */}
       {profileModalOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-navy-900 rounded-2xl max-w-2xl w-full border border-gray-100 dark:border-navy-800 shadow-2xl overflow-hidden animate-fadeIn">
-            <div className="p-4 border-b border-gray-100 dark:border-navy-800 flex items-center justify-between bg-gradient-to-r from-orange-50 to-orange-100/40 dark:bg-navy-800">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-200">
+          <div className="bg-white rounded-2xl max-w-2xl w-full border border-[#E5E7EB] shadow-2xl overflow-hidden animate-fadeIn">
+            <div className="p-4 border-b border-[#E5E7EB] flex items-center justify-between bg-gradient-to-r from-[#FFF0E5] to-[#FFF8F1]">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center font-black text-sm">
+                <div className="w-10 h-10 rounded-full bg-[#F97316] text-white flex items-center justify-center font-black text-sm shadow-sm">
                   {fullProfileData?.employee?.name?.charAt(0).toUpperCase() || 'E'}
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-navy-900 dark:text-white">
+                  <h3 className="text-base font-bold text-[#172033]">
                     {fullProfileData?.employee?.name}
                   </h3>
-                  <p className="text-xs text-navy-500">
+                  <p className="text-xs text-[#6B7280]">
                     {fullProfileData?.employee?.designation} • {fullProfileData?.employee?.mobile}
                   </p>
                 </div>
               </div>
-              <button onClick={() => setProfileModalOpen(false)} className="p-1.5 text-navy-400 hover:text-navy-700">
+              <button
+                onClick={() => setProfileModalOpen(false)}
+                className="p-1.5 text-[#6B7280] hover:text-[#172033] rounded-lg transition cursor-pointer"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="p-6 max-h-[75vh] overflow-y-auto space-y-5">
               {profileLoading || !fullProfileData ? (
-                <SkeletonLoader rows={4} />
+                <SkeletonBlock rows={4} />
               ) : (
                 <>
                   {/* Basic Stats */}
                   <div className="grid grid-cols-3 gap-3 text-center">
-                    <div className="p-3 bg-gray-50 dark:bg-navy-800 rounded-xl">
-                      <p className="text-[10px] text-navy-400 font-bold uppercase">Monthly Wage</p>
-                      <p className="text-base font-black text-navy-900 dark:text-white mt-0.5">
+                    <div className="p-3 bg-[#FFF8F1] rounded-xl border border-[#E5E7EB]">
+                      <p className="text-[10px] text-[#6B7280] font-bold uppercase">Monthly Wage</p>
+                      <p className="text-base font-black text-[#172033] mt-0.5">
                         ₹{fullProfileData.employee?.salary?.toLocaleString('en-IN')}
                       </p>
                     </div>
-                    <div className="p-3 bg-red-50/60 dark:bg-red-950/20 rounded-xl">
-                      <p className="text-[10px] text-red-600 font-bold uppercase">Total Absents</p>
-                      <p className="text-base font-black text-red-600 mt-0.5">
+                    <div className="p-3 bg-rose-50 rounded-xl border border-rose-100">
+                      <p className="text-[10px] text-rose-600 font-bold uppercase">Total Absents</p>
+                      <p className="text-base font-black text-rose-600 mt-0.5">
                         {fullProfileData.totalAbsentDays} days
                       </p>
                     </div>
-                    <div className="p-3 bg-amber-50/60 dark:bg-amber-950/20 rounded-xl">
+                    <div className="p-3 bg-amber-50 rounded-xl border border-amber-100">
                       <p className="text-[10px] text-amber-600 font-bold uppercase">Total Advances</p>
                       <p className="text-base font-black text-amber-600 mt-0.5">
                         ₹{fullProfileData.totalAdvancesAmount?.toLocaleString('en-IN')}
@@ -1851,27 +1986,27 @@ const EmployeeEntry = () => {
 
                   {/* Attendance Log */}
                   <div>
-                    <h4 className="text-xs font-bold text-navy-900 dark:text-white uppercase tracking-wider mb-2">
+                    <h4 className="text-xs font-bold text-[#172033] uppercase tracking-wider mb-2">
                       Recent Attendance / Absences
                     </h4>
                     {fullProfileData.recentAttendance?.length === 0 ? (
-                      <p className="text-xs text-navy-400 italic">No absent marks recorded.</p>
+                      <p className="text-xs text-[#9CA3AF] italic">No absent marks recorded.</p>
                     ) : (
-                      <div className="space-y-1.5 max-h-36 overflow-y-auto">
+                      <div className="space-y-1.5 max-h-36 overflow-y-auto border border-[#E5E7EB] p-2 rounded-xl">
                         {fullProfileData.recentAttendance.map((a) => (
                           <div
                             key={a._id}
-                            className="p-2 rounded-lg bg-gray-50 dark:bg-navy-800 flex items-center justify-between text-xs"
+                            className="p-2 rounded-lg bg-[#FFF8F1]/60 flex items-center justify-between text-xs"
                           >
-                            <span className="font-semibold">
+                            <span className="font-semibold text-[#172033]">
                               {new Date(a.date).toLocaleDateString('en-IN', {
                                 day: '2-digit',
                                 month: 'short',
                                 year: 'numeric',
                               })}
                             </span>
-                            <span className="text-red-600 font-bold">{a.status}</span>
-                            <span className="text-navy-400 text-[11px]">{a.remarks}</span>
+                            <span className="text-rose-600 font-bold">{a.status}</span>
+                            <span className="text-[#6B7280] text-[11px]">{a.remarks}</span>
                           </div>
                         ))}
                       </div>
@@ -1880,19 +2015,19 @@ const EmployeeEntry = () => {
 
                   {/* Advances Log */}
                   <div>
-                    <h4 className="text-xs font-bold text-navy-900 dark:text-white uppercase tracking-wider mb-2">
+                    <h4 className="text-xs font-bold text-[#172033] uppercase tracking-wider mb-2">
                       Salary Advances History
                     </h4>
                     {fullProfileData.advances?.length === 0 ? (
-                      <p className="text-xs text-navy-400 italic">No salary advances taken.</p>
+                      <p className="text-xs text-[#9CA3AF] italic">No salary advances taken.</p>
                     ) : (
-                      <div className="space-y-1.5 max-h-36 overflow-y-auto">
+                      <div className="space-y-1.5 max-h-36 overflow-y-auto border border-[#E5E7EB] p-2 rounded-xl">
                         {fullProfileData.advances.map((adv) => (
                           <div
                             key={adv._id}
-                            className="p-2 rounded-lg bg-gray-50 dark:bg-navy-800 flex items-center justify-between text-xs"
+                            className="p-2 rounded-lg bg-[#FFF8F1]/60 flex items-center justify-between text-xs"
                           >
-                            <span>
+                            <span className="text-[#172033]">
                               {new Date(adv.date).toLocaleDateString('en-IN', {
                                 day: '2-digit',
                                 month: 'short',
@@ -1900,7 +2035,7 @@ const EmployeeEntry = () => {
                               })}
                             </span>
                             <span className="font-bold text-amber-600">₹{adv.amount}</span>
-                            <span className="text-navy-400 text-[11px]">{adv.remarks}</span>
+                            <span className="text-[#6B7280] text-[11px]">{adv.remarks}</span>
                           </div>
                         ))}
                       </div>
@@ -1909,22 +2044,22 @@ const EmployeeEntry = () => {
 
                   {/* Salary Payment History */}
                   <div>
-                    <h4 className="text-xs font-bold text-navy-900 dark:text-white uppercase tracking-wider mb-2">
+                    <h4 className="text-xs font-bold text-[#172033] uppercase tracking-wider mb-2">
                       Paid Salary Receipts
                     </h4>
                     {fullProfileData.salaryPayments?.length === 0 ? (
-                      <p className="text-xs text-navy-400 italic">No salary payouts logged yet.</p>
+                      <p className="text-xs text-[#9CA3AF] italic">No salary payouts logged yet.</p>
                     ) : (
-                      <div className="space-y-1.5 max-h-36 overflow-y-auto">
+                      <div className="space-y-1.5 max-h-36 overflow-y-auto border border-[#E5E7EB] p-2 rounded-xl">
                         {fullProfileData.salaryPayments.map((p) => (
                           <div
                             key={p._id}
-                            className="p-2 rounded-lg bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/40 flex items-center justify-between text-xs"
+                            className="p-2.5 rounded-lg bg-emerald-50/60 border border-emerald-100 flex items-center justify-between text-xs"
                           >
-                            <span className="font-bold">{p.salaryMonth}</span>
+                            <span className="font-bold text-[#172033]">{p.salaryMonth}</span>
                             <span className="font-black text-emerald-600">₹{p.paidAmount}</span>
-                            <span className="text-navy-400 text-[10px]">{p.paymentMode}</span>
-                            <span className="text-navy-400 text-[10px]">
+                            <span className="text-[#6B7280] text-[10px] bg-white px-2 py-0.5 rounded border border-emerald-200 font-semibold">{p.paymentMode}</span>
+                            <span className="text-[#6B7280] text-[10px]">
                               {new Date(p.paymentDate).toLocaleDateString('en-IN')}
                             </span>
                           </div>
@@ -1936,10 +2071,10 @@ const EmployeeEntry = () => {
               )}
             </div>
 
-            <div className="p-4 border-t border-gray-100 dark:border-navy-800 flex justify-end bg-gray-50/50">
+            <div className="p-4 border-t border-[#E5E7EB] flex justify-end bg-[#FFF8F1]/40">
               <button
                 onClick={() => setProfileModalOpen(false)}
-                className="px-5 py-2 text-xs font-bold rounded-xl bg-navy-900 text-white"
+                className="px-5 py-2 text-xs font-bold rounded-xl bg-[#172033] hover:bg-black text-white cursor-pointer transition shadow-xs"
               >
                 Close Profile
               </button>

@@ -11,7 +11,7 @@ const DuplicateWarningModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-200">
       <div className="bg-white dark:bg-navy-900 rounded-2xl max-w-md w-full border border-amber-200 dark:border-amber-900/50 shadow-2xl overflow-hidden animate-fadeIn">
         <div className="p-6 text-center">
           <div className="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center mx-auto mb-4 border border-amber-200 dark:border-amber-900/30">

@@ -39,7 +39,7 @@ const RecordDetailsModal = ({ isOpen, onClose, title, data = {}, type = 'general
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy/60 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md overflow-y-auto transition-all duration-200">
       <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-[#E5E7EB] animate-in fade-in duration-200 max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-[#E5E7EB]">
@@ -182,7 +182,7 @@ const RecordDetailsModal = ({ isOpen, onClose, title, data = {}, type = 'general
               <div className="flex items-center justify-between pb-2.5 border-b border-[#E5E7EB]">
                 <span className="text-[#6B7280] font-semibold">Bill / Receipt File:</span>
                 <a
-                  href={`http://localhost:5000${data.bill}`}
+                  href={`${import.meta.env.VITE_SERVER_BASE_URL || ''}${data.bill}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-bold text-[#2563EB] hover:underline flex items-center gap-1"

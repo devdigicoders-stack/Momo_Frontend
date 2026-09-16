@@ -23,7 +23,7 @@ import {
   ToggleRight,
   AlertCircle,
 } from 'lucide-react';
-import SkeletonLoader from '../../components/SkeletonLoader';
+import { SkeletonCard } from '../../components/SkeletonLoader';
 import toast from 'react-hot-toast';
 
 const Settings = () => {
@@ -282,7 +282,11 @@ const Settings = () => {
       </div>
 
       {loading ? (
-        <SkeletonLoader count={3} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
       ) : (
         <>
           {/* TAB 1: RESTAURANT PROFILE */}

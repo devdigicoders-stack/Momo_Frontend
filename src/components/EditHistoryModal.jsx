@@ -5,7 +5,7 @@ const EditHistoryModal = ({ isOpen, onClose, recordTitle, editHistory = [] }) =>
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-200">
       <div className="bg-white dark:bg-navy-900 rounded-2xl max-w-xl w-full border border-gray-100 dark:border-navy-800 shadow-2xl overflow-hidden animate-fadeIn">
         {/* Header */}
         <div className="p-5 border-b border-gray-100 dark:border-navy-800 flex items-center justify-between bg-gradient-to-r from-orange-50 to-orange-100/30 dark:from-navy-800 dark:to-navy-900">

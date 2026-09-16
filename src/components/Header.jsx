@@ -70,6 +70,26 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
     }
   };
 
+  const handleNotificationClick = (n) => {
+    setNotifOpen(false);
+    const cat = n.category || '';
+    if (cat === 'CHEF_REQUIREMENT') {
+      navigate('/chef-requirements');
+    } else if (cat === 'DAMAGE_REPORT') {
+      navigate('/chef-requirements');
+    } else if (cat === 'EXPENSE') {
+      navigate('/expenses');
+    } else if (cat === 'SALES') {
+      navigate('/sales');
+    } else if (cat === 'PURCHASE') {
+      navigate('/momo-purchases');
+    } else if (cat === 'LOCK') {
+      navigate('/daily-control');
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
   const roleInfo = getRoleBadge(user?.role);
 
   return (
@@ -152,8 +172,9 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
                     notifications.map((n, idx) => (
                       <div
                         key={idx}
-                        className={`p-3 text-xs flex items-start space-x-2.5 hover:bg-slate-50 transition ${
-                          !n.isRead ? 'bg-[#FFF8F1]/60' : ''
+                        onClick={() => handleNotificationClick(n)}
+                        className={`p-3 text-xs flex items-start space-x-2.5 hover:bg-[#FFF0E5]/50 transition cursor-pointer ${
+                          !n.isRead ? 'bg-[#FFF8F1]/80' : ''
                         }`}
                       >
                         <div className="mt-0.5">
@@ -168,7 +189,14 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
                           )}
                         </div>
                         <div className="flex-1">
-                          <p className="font-bold text-[#172033]">{n.title}</p>
+                          <div className="flex items-center justify-between">
+                            <p className="font-bold text-[#172033]">{n.title}</p>
+                            {n.category && (
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-orange-100 text-orange-700">
+                                {n.category.replace('_', ' ')}
+                              </span>
+                            )}
+                          </div>
                           <p className="text-[11px] text-[#4B5563] mt-0.5">{n.message}</p>
                           <span className="text-[9px] text-[#9CA3AF] mt-1 block">
                             {new Date(n.createdAt).toLocaleTimeString('en-IN', {

@@ -106,7 +106,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       {/* Mobile backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-navy/70 backdrop-blur-xs lg:hidden"
+          className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-md lg:hidden transition-all duration-200"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -121,12 +121,16 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         <div>
           <div className="h-16 flex items-center justify-between px-6 border-b border-[#232F48]">
             <div className="flex items-center space-x-3">
-              <div className="w-9 h-9 rounded-xl bg-[#F97316] text-white flex items-center justify-center font-bold text-base shadow-md shadow-[#F97316]/30">
-                <Flame className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 rounded-full bg-white p-0.5 shadow-md shadow-[#F97316]/20 flex items-center justify-center shrink-0">
+                <img 
+                  src="/logo.png" 
+                  alt="Momos Bhandar" 
+                  className="w-full h-full object-cover rounded-full"
+                />
               </div>
               <div>
                 <h1 className="font-bold text-white text-base leading-tight tracking-tight">Momos Bhandar</h1>
-                <p className="text-[11px] font-medium text-orange-200/70">Control System</p>
+                <p className="text-[11px] font-medium text-orange-400">Control System</p>
               </div>
             </div>
             <button

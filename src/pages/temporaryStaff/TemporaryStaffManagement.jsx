@@ -1402,7 +1402,7 @@ const TemporaryStaffManagement = () => {
       {/* 8. MODAL: ADD / EDIT TEMPORARY STAFF */}
       {/* ------------------------------------------------------------------- */}
       {showStaffModal && (
-        <div className="fixed inset-0 z-50 bg-[#172033]/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-md overflow-y-auto flex items-center justify-center p-4 transition-all duration-200">
           <div className="bg-white border border-[#E5E7EB] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between p-5 border-b border-[#E5E7EB] bg-[#FFF8F1]">
               <h3 className="text-base font-bold text-[#172033] flex items-center gap-2">
@@ -1515,7 +1515,7 @@ const TemporaryStaffManagement = () => {
       {/* 9. MODAL: LOG WORKED DATE ENTRY */}
       {/* ------------------------------------------------------------------- */}
       {showWorkModal && (
-        <div className="fixed inset-0 z-50 bg-[#172033]/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-md overflow-y-auto flex items-center justify-center p-4 transition-all duration-200">
           <div className="bg-white border border-[#E5E7EB] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between p-5 border-b border-[#E5E7EB] bg-[#FFF8F1]">
               <h3 className="text-base font-bold text-[#172033] flex items-center gap-2">
@@ -1624,7 +1624,7 @@ const TemporaryStaffManagement = () => {
       {/* 10. MODAL: RECORD PAYMENT (PAYOUT) */}
       {/* ------------------------------------------------------------------- */}
       {showPaymentModal && (
-        <div className="fixed inset-0 z-50 bg-[#172033]/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-md overflow-y-auto flex items-center justify-center p-4 transition-all duration-200">
           <div className="bg-white border border-[#E5E7EB] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between p-5 border-b border-[#E5E7EB] bg-[#FFF8F1]">
               <h3 className="text-base font-bold text-[#172033] flex items-center gap-2">
@@ -1744,7 +1744,7 @@ const TemporaryStaffManagement = () => {
       {/* 11. MODAL: 360 STAFF DETAIL PROFILE */}
       {/* ------------------------------------------------------------------- */}
       {profileModalData && (
-        <div className="fixed inset-0 z-50 bg-[#172033]/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-md overflow-y-auto flex items-center justify-center p-4 transition-all duration-200">
           <div className="bg-white border border-[#E5E7EB] rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-150">
             {/* Header */}
             <div className="flex items-center justify-between p-5 border-b border-[#E5E7EB] bg-[#FFF8F1]">

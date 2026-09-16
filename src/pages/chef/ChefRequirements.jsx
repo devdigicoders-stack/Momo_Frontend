@@ -637,7 +637,7 @@ const ChefRequirements = ({ myOnly = false }) => {
 
       {/* Add / Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy/60 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md overflow-y-auto transition-all duration-200">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-[#E5E7EB] animate-in fade-in duration-200">
             <div className="flex items-center justify-between pb-4 border-b border-[#E5E7EB]">
               <div className="flex items-center space-x-2">

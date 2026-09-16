@@ -429,7 +429,7 @@ const Users = () => {
 
       {/* Add / Edit User Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/60 flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-150">
+        <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 transition-all duration-200">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-[#E5E7EB] animate-in zoom-in-95 duration-150 relative z-[101]">
             {/* Modal Header */}
             <div className="flex items-center justify-between pb-4 border-b border-[#E5E7EB]">
