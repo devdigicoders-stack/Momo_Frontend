@@ -70,7 +70,7 @@ const Reports = () => {
     if (!reportData) return;
 
     const rows = [
-      ['Momos Bhandar - Operational & Financial Report'],
+      ['RK Food Ventures - Operational & Financial Report'],
       ['Generated On', new Date().toLocaleString('en-IN')],
       ['Date Filter', datePreset.toUpperCase()],
       ['From Date', fromDate || 'N/A'],

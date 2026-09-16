@@ -730,7 +730,7 @@ const Settings = () => {
                       rows={3}
                       value={formData.billFooterNote}
                       onChange={(e) => setFormData({ ...formData, billFooterNote: e.target.value })}
-                      placeholder="e.g. Thank you for dining with Momos Bhandar! Visit Again."
+                      placeholder="e.g. Thank you for dining with RK Food Ventures! Visit Again."
                       className="w-full px-3.5 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-xs font-semibold text-[#172033] focus:ring-2 focus:ring-[#F97316] outline-hidden shadow-2xs"
                     />
                   </div>

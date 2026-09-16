@@ -78,17 +78,17 @@ const Login = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center relative z-10 px-4">
         {/* Circular Mascot Logo Container */}
         <div className="relative inline-block mb-3">
-          <div className="w-28 h-28 mx-auto rounded-full bg-white p-1 shadow-xl shadow-[#F97316]/20 border-2 border-[#FDBA74] flex items-center justify-center">
+          <div className="w-28 h-28 mx-auto rounded-full bg-white p-1 shadow-xl shadow-[#F97316]/20 border-2 border-[#FDBA74] flex items-center justify-center overflow-hidden">
             <img 
-              src="/logo.png" 
-              alt="Momos Bhandar Mascot" 
+              src="/panel-logo.png" 
+              alt="RK Food Ventures" 
               className="w-full h-full object-cover rounded-full"
             />
           </div>
         </div>
 
         <h1 className="text-3xl font-black text-[#172033] tracking-tight sm:text-4xl">
-          Momos Bhandar
+          RK Food Ventures
         </h1>
         <p className="mt-1 text-sm text-[#6B7280] font-medium">
           Restaurant Management & Business Control System
@@ -210,7 +210,7 @@ const Login = () => {
         {/* Security badge footer */}
         <div className="mt-4 text-center flex items-center justify-center space-x-1.5 text-xs text-[#6B7280] font-medium">
           <ShieldCheck className="w-4 h-4 text-[#16A34A]" />
-          <span>Role-Based Secure Session • Momos Bhandar</span>
+          <span>Role-Based Secure Session • RK Food Ventures</span>
         </div>
       </div>
     </div>

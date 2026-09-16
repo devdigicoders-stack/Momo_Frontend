@@ -125,7 +125,7 @@ const Dashboard = () => {
         <div className="space-y-2">
           <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#232F48] text-[#F97316] border border-[#334155]/60">
             <Sparkles className="w-3.5 h-3.5 text-[#F97316]" />
-            <span>Momos Bhandar • Business Control Portal</span>
+            <span>RK Food Ventures • Business Control Portal</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2">
             Welcome, {user?.name}!
@@ -137,15 +137,15 @@ const Dashboard = () => {
         </div>
 
         <div className="hidden md:flex items-center space-x-3 bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/15">
-          <div className="w-12 h-12 rounded-full bg-white p-0.5 shadow-md shadow-black/20 shrink-0">
+          <div className="w-12 h-12 rounded-full bg-white p-0.5 shadow-md shadow-black/20 shrink-0 overflow-hidden">
             <img 
-              src="/logo.png" 
-              alt="Momos Bhandar" 
+              src="/panel-logo.png" 
+              alt="RK Food Ventures" 
               className="w-full h-full object-cover rounded-full"
             />
           </div>
           <div>
-            <p className="text-xs font-bold text-white leading-tight">Momos Bhandar</p>
+            <p className="text-xs font-bold text-white leading-tight">RK Food Ventures</p>
             <p className="text-[11px] text-[#F97316] font-semibold">Good Food • Better Business</p>
           </div>
         </div>
