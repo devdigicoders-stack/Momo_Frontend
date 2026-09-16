@@ -1,4 +1,5 @@
 import React from 'react';
+import { getMediaUrl } from '../services/api';
 import {
   X,
   Calendar,
@@ -182,7 +183,7 @@ const RecordDetailsModal = ({ isOpen, onClose, title, data = {}, type = 'general
               <div className="flex items-center justify-between pb-2.5 border-b border-[#E5E7EB]">
                 <span className="text-[#6B7280] font-semibold">Bill / Receipt File:</span>
                 <a
-                  href={`${import.meta.env.VITE_SERVER_BASE_URL || ''}${data.bill}`}
+                  href={getMediaUrl(data.bill)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-bold text-[#2563EB] hover:underline flex items-center gap-1"

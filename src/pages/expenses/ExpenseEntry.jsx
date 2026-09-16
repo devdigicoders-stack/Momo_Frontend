@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { getMediaUrl } from '../../services/api';
 import expenseService, { expenseCategoryService } from '../../services/expenseService';
 import ExpenseCategoryModal from './ExpenseCategoryModal';
 import Pagination from '../../components/Pagination';
@@ -648,7 +649,7 @@ const ExpenseEntry = () => {
                     <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap">
                       {item.bill ? (
                         <a
-                          href={`http://localhost:5000${item.bill}`}
+                          href={getMediaUrl(item.bill)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center text-xs font-semibold text-[#2563EB] hover:underline"

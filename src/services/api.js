@@ -1,7 +1,18 @@
 import axios from 'axios';
 
+// Single source of truth: handles both with or without /api automatically
+const rawEnvUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+export const SERVER_BASE_URL = rawEnvUrl.replace(/\/api\/?$/, '');
+export const API_BASE_URL = `${SERVER_BASE_URL}/api`;
+
+export const getMediaUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  return `${SERVER_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json'
   }
