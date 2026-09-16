@@ -119,17 +119,19 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       >
         {/* Brand Header */}
         <div>
-          <div className="h-16 flex items-center justify-between px-4 border-b border-[#232F48]">
-            <div className="flex items-center space-x-2 overflow-hidden">
-              <img 
-                src="/panel-logo.png" 
-                alt="RK Food Ventures" 
-                className="h-10 w-auto max-w-[185px] object-contain rounded-lg"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = '/app-logo.png';
-                }}
-              />
+          <div className="h-16 flex items-center justify-between px-5 border-b border-[#232F48]">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-full bg-white p-0.5 shadow-md shadow-[#F97316]/20 flex items-center justify-center shrink-0 overflow-hidden">
+                <img 
+                  src="/app-logo.png" 
+                  alt="RK Food Ventures" 
+                  className="w-full h-full object-cover rounded-full"
+                />
+              </div>
+              <div className="overflow-hidden">
+                <h1 className="font-bold text-white text-base leading-tight tracking-tight truncate">RK Food Ventures</h1>
+                <p className="text-[11px] font-medium text-orange-400">Control System</p>
+              </div>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
