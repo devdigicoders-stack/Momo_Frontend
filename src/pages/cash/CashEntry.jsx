@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import cashService from '../../services/cashService';
+import { getMediaUrl } from '../../services/api';
 import Pagination from '../../components/Pagination';
 import EditHistoryModal from '../../components/EditHistoryModal';
 import DuplicateWarningModal from '../../components/DuplicateWarningModal';
@@ -1302,11 +1303,11 @@ const CashEntry = () => {
             </div>
 
             <div className="p-6 text-center max-h-[70vh] overflow-y-auto">
-              {viewSlipUrl.endsWith('.pdf') ? (
-                <iframe src={viewSlipUrl} className="w-full h-96 rounded-xl border border-gray-200" title="Slip PDF" />
+              {viewSlipUrl.toLowerCase().endsWith('.pdf') ? (
+                <iframe src={getMediaUrl(viewSlipUrl)} className="w-full h-96 rounded-xl border border-gray-200" title="Slip PDF" />
               ) : (
                 <img
-                  src={viewSlipUrl}
+                  src={getMediaUrl(viewSlipUrl)}
                   alt="Deposit Slip"
                   className="max-h-[60vh] mx-auto rounded-xl shadow-xs object-contain"
                 />
@@ -1315,7 +1316,7 @@ const CashEntry = () => {
 
             <div className="p-4 border-t border-[#E5E7EB] flex justify-between items-center bg-gray-50/50">
               <a
-                href={viewSlipUrl}
+                href={getMediaUrl(viewSlipUrl)}
                 download
                 target="_blank"
                 rel="noreferrer"
