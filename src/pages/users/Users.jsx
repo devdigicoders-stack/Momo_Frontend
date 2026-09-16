@@ -213,14 +213,20 @@ const Users = () => {
     return found || { label: roleCode, badgeClass: 'bg-slate-100 text-[#374151] border-[#E5E7EB]' };
   };
 
-  const filteredUsers = users.filter((u) => {
-    const matchesSearch =
-      u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (u.email && u.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      u.mobile.includes(searchQuery);
-    const matchesRole = roleFilter === 'ALL' || u.role === roleFilter;
-    return matchesSearch && matchesRole;
-  });
+  const filteredUsers = users
+    .filter((u) => u._id !== currentUser?._id && u._id !== currentUser?.id)
+    .filter((u) => {
+      const matchesSearch =
+        u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (u.email && u.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        u.mobile.includes(searchQuery);
+      const matchesRole = roleFilter === 'ALL' || u.role === roleFilter;
+      return matchesSearch && matchesRole;
+    });
+
+  const displayUsersCount = users.filter(
+    (u) => u._id !== currentUser?._id && u._id !== currentUser?.id
+  ).length;
 
   return (
     <div className="space-y-6">
@@ -231,7 +237,7 @@ const Users = () => {
             User Management
             <Tooltip text="Total registered users across all roles" position="right">
               <span className="ml-3 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#FFF0E5] text-[#F97316] border border-[#FFEDD5] cursor-help">
-                {users.length} Total
+                {displayUsersCount} Total
               </span>
             </Tooltip>
           </h1>
