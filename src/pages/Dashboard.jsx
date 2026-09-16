@@ -37,7 +37,7 @@ const Dashboard = () => {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [datePreset, setDatePreset] = useState('today');
+  const [datePreset, setDatePreset] = useState('all');
   const [customDate, setCustomDate] = useState('');
   const [summaryData, setSummaryData] = useState(null);
 
@@ -209,6 +209,7 @@ const Dashboard = () => {
               Summary Date:
             </div>
             {[
+              { id: 'all', label: 'All Days' },
               { id: 'today', label: 'Today' },
               { id: 'yesterday', label: 'Yesterday' },
               { id: 'custom', label: 'Custom Date' },
@@ -229,13 +230,13 @@ const Dashboard = () => {
 
           <button
             onClick={() => {
-              setDatePreset('today');
+              setDatePreset('all');
               setCustomDate('');
             }}
             className="flex items-center gap-1.5 text-xs font-semibold text-[#6B7280] hover:text-[#F97316] px-2.5 py-1.5 rounded-lg hover:bg-[#FFF0E5] transition-colors"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            Reset to Today
+            Reset to All Days
           </button>
         </div>
 
