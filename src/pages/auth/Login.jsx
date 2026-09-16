@@ -80,7 +80,7 @@ const Login = () => {
         <div className="relative inline-block mb-3">
           <div className="w-28 h-28 mx-auto rounded-full bg-white p-1 shadow-xl shadow-[#F97316]/20 border-2 border-[#FDBA74] flex items-center justify-center overflow-hidden">
             <img 
-              src="/panel-logo.png" 
+              src="/app-logo.png" 
               alt="RK Food Ventures" 
               className="w-full h-full object-cover rounded-full"
             />

@@ -139,7 +139,7 @@ const Dashboard = () => {
         <div className="hidden md:flex items-center space-x-3 bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/15">
           <div className="w-12 h-12 rounded-full bg-white p-0.5 shadow-md shadow-black/20 shrink-0 overflow-hidden">
             <img 
-              src="/panel-logo.png" 
+              src="/app-logo.png" 
               alt="RK Food Ventures" 
               className="w-full h-full object-cover rounded-full"
             />

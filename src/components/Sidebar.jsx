@@ -121,9 +121,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         <div>
           <div className="h-16 flex items-center justify-between px-6 border-b border-[#232F48]">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-full bg-white p-0.5 shadow-md shadow-[#F97316]/20 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-full bg-white p-0.5 shadow-md shadow-[#F97316]/20 flex items-center justify-center shrink-0 overflow-hidden">
                 <img 
-                  src="/panel-logo.png" 
+                  src="/app-logo.png" 
                   alt="RK Food Ventures" 
                   className="w-full h-full object-cover rounded-full"
                 />

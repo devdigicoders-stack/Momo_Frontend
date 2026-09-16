@@ -108,13 +108,13 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
 
         <div className="flex items-center space-x-2 lg:hidden">
           <div className="w-8 h-8 rounded-full bg-white p-0.5 shadow-xs overflow-hidden border border-[#E5E7EB] shrink-0">
-            <img src="/panel-logo.png" alt="RK Food Ventures" className="w-full h-full object-cover rounded-full" />
+            <img src="/app-logo.png" alt="RK Food Ventures" className="w-full h-full object-cover rounded-full" />
           </div>
           <span className="font-extrabold text-[#172033] text-base">RK Food Ventures</span>
         </div>
         
         <div className="hidden lg:flex items-center text-sm font-bold text-[#172033] space-x-2">
-          <img src="/panel-logo.png" alt="RK Food Ventures" className="w-6 h-6 rounded-full object-cover border border-[#E5E7EB]" />
+          <img src="/app-logo.png" alt="RK Food Ventures" className="w-6 h-6 rounded-full object-cover border border-[#E5E7EB]" />
           <span>RK Food Ventures Restaurant Management</span>
         </div>
       </div>
