@@ -29,7 +29,24 @@ import SkeletonLoader from '../../components/SkeletonLoader';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 
-const PAYMENT_MODES = ['Cash', 'UPI', 'Card', 'Net Banking', 'Canara / Bank', 'Paytm', 'PhonePe', 'Other'];
+const PAYMENT_MODES = ['Cash', 'Online'];
+
+const DEFAULT_CATEGORIES = [
+  { name: 'Groceries', isActive: true },
+  { name: 'Disposable', isActive: true },
+  { name: 'Vegetables', isActive: true },
+  { name: 'Cream and Chaap', isActive: true },
+  { name: 'Colddrinks', isActive: true },
+  { name: 'Water', isActive: true },
+  { name: 'Dairy', isActive: true },
+  { name: 'Roomali Roti', isActive: true },
+  { name: 'Cylinder', isActive: true },
+  { name: 'Staff Expenses', isActive: true },
+  { name: 'Petrol', isActive: true },
+  { name: 'Utility Bills', isActive: true },
+  { name: 'Maintenance & Repairs', isActive: true },
+  { name: 'Others', isActive: true },
+];
 
 const ExpenseEntry = () => {
   const { user } = useAuth();
@@ -61,7 +78,6 @@ const ExpenseEntry = () => {
   // Filter & Search state
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
-  const [filterSubcategory, setFilterSubcategory] = useState('');
   const [filterMode, setFilterMode] = useState('');
   const [datePreset, setDatePreset] = useState('');
   const [fromDate, setFromDate] = useState('');
@@ -72,7 +88,6 @@ const ExpenseEntry = () => {
   const initialFormState = {
     date: new Date().toISOString().split('T')[0],
     category: '',
-    subcategory: '',
     item: '',
     amount: '',
     paymentMode: 'Cash',
@@ -113,7 +128,6 @@ const ExpenseEntry = () => {
         limit: 1000,
         search: searchTerm,
         category: filterCategory,
-        subcategory: filterSubcategory,
         paymentMode: filterMode,
         datePreset,
         fromDate,
@@ -122,12 +136,11 @@ const ExpenseEntry = () => {
       });
 
       if (res.success && res.data && res.data.length > 0) {
-        const headers = ['Entry ID', 'Date', 'Category', 'Subcategory', 'Item / Description', 'Amount (Rs.)', 'Payment Mode', 'Remarks', 'Edited', 'Entered By', 'Created At'];
+        const headers = ['Entry ID', 'Date', 'Category', 'Item / Description', 'Amount (Rs.)', 'Payment Mode', 'Remarks', 'Edited', 'Entered By', 'Created At'];
         const rows = res.data.map((e) => [
           e.entryCode || `EXP-${e._id.toString().slice(-4)}`,
           new Date(e.date).toLocaleDateString('en-IN'),
           e.category,
-          e.subcategory || '',
           e.item,
           e.amount,
           e.paymentMode,
@@ -152,11 +165,14 @@ const ExpenseEntry = () => {
   const fetchCategories = async () => {
     try {
       const res = await expenseCategoryService.getAllCategories();
-      if (res.success) {
+      if (res.success && res.data && res.data.length > 0) {
         setCategories(res.data);
+      } else {
+        setCategories(DEFAULT_CATEGORIES);
       }
     } catch (error) {
       console.error('Failed to load expense categories:', error);
+      setCategories(DEFAULT_CATEGORIES);
     }
   };
 
@@ -169,7 +185,6 @@ const ExpenseEntry = () => {
         limit,
         search: searchTerm,
         category: filterCategory,
-        subcategory: filterSubcategory,
         paymentMode: filterMode,
         datePreset,
         fromDate,
@@ -200,7 +215,6 @@ const ExpenseEntry = () => {
   }, [
     searchTerm,
     filterCategory,
-    filterSubcategory,
     filterMode,
     datePreset,
     fromDate,
@@ -223,7 +237,6 @@ const ExpenseEntry = () => {
   const handleResetFilters = () => {
     setSearchTerm('');
     setFilterCategory('');
-    setFilterSubcategory('');
     setFilterMode('');
     setDatePreset('');
     setFromDate('');
@@ -244,8 +257,7 @@ const ExpenseEntry = () => {
     setFormData({
       date: new Date(expense.date).toISOString().split('T')[0],
       category: expense.category,
-      subcategory: expense.subcategory || '',
-      item: expense.item,
+      item: expense.item || '',
       amount: expense.amount,
       paymentMode: expense.paymentMode,
       remarks: expense.remarks || '',
@@ -268,23 +280,10 @@ const ExpenseEntry = () => {
     setHistoryModalOpen(true);
   };
 
-  // Selected Category's subcategories for modal
-  const currentCategoryObj = categories.find((c) => c.name === formData.category);
-  const availableSubcategories = currentCategoryObj?.subcategories?.filter((s) => s.isActive) || [];
-
-  // Selected Category's subcategories for filter bar
-  const filterCategoryObj = categories.find((c) => c.name === filterCategory);
-  const filterSubcategories = filterCategoryObj?.subcategories?.filter((s) => s.isActive) || [];
-
   // Trigger Save with duplicate warning check
   const triggerSave = async (addAnother = false) => {
     if (!formData.category) {
       toast.error('Please select an expense category');
-      return;
-    }
-
-    if (!formData.item.trim()) {
-      toast.error('Please enter the item or description');
       return;
     }
 
@@ -293,13 +292,15 @@ const ExpenseEntry = () => {
       return;
     }
 
+    const finalItem = (formData.item && formData.item.trim()) ? formData.item.trim() : formData.category.trim();
+
     if (!editingExpense) {
       const match = expenses.find(
         (e) =>
           new Date(e.date).toISOString().split('T')[0] === formData.date &&
           e.category === formData.category &&
           Number(e.amount) === Number(formData.amount) &&
-          e.item.trim().toLowerCase() === formData.item.trim().toLowerCase()
+          (e.item || '').trim().toLowerCase() === finalItem.toLowerCase()
       );
       if (match && !duplicateWarningOpen) {
         setPendingSubmitAction(() => () => executeSave(addAnother));
@@ -314,11 +315,11 @@ const ExpenseEntry = () => {
   const executeSave = async (addAnother = false) => {
     try {
       setSubmitting(true);
+      const finalItem = (formData.item && formData.item.trim()) ? formData.item.trim() : formData.category.trim();
       const data = new FormData();
       data.append('date', formData.date);
       data.append('category', formData.category);
-      data.append('subcategory', formData.subcategory);
-      data.append('item', formData.item);
+      data.append('item', finalItem);
       data.append('amount', formData.amount);
       data.append('paymentMode', formData.paymentMode);
       data.append('remarks', formData.remarks);
@@ -451,35 +452,16 @@ const ExpenseEntry = () => {
             {/* Category Filter */}
             <select
               value={filterCategory}
-              onChange={(e) => {
-                setFilterCategory(e.target.value);
-                setFilterSubcategory('');
-              }}
+              onChange={(e) => setFilterCategory(e.target.value)}
               className="px-3 py-2 bg-[#FFF8F1]/60 border border-[#E5E7EB] rounded-xl text-xs font-medium text-[#172033] focus:outline-none focus:border-[#F97316] cursor-pointer"
             >
               <option value="">All Categories</option>
-              {categories.map((cat) => (
-                <option key={cat._id} value={cat.name}>
+              {categories.map((cat, idx) => (
+                <option key={cat._id || idx} value={cat.name}>
                   {cat.name}
                 </option>
               ))}
             </select>
-
-            {/* Subcategory Filter */}
-            {filterSubcategories.length > 0 && (
-              <select
-                value={filterSubcategory}
-                onChange={(e) => setFilterSubcategory(e.target.value)}
-                className="px-3 py-2 bg-[#FFF8F1]/60 border border-[#E5E7EB] rounded-xl text-xs font-medium text-[#172033] focus:outline-none focus:border-[#F97316] cursor-pointer"
-              >
-                <option value="">All Subcategories</option>
-                {filterSubcategories.map((sub, idx) => (
-                  <option key={idx} value={sub.name}>
-                    {sub.name}
-                  </option>
-                ))}
-              </select>
-            )}
 
             {/* Payment Mode */}
             <select
@@ -509,7 +491,6 @@ const ExpenseEntry = () => {
 
             {(searchTerm ||
               filterCategory ||
-              filterSubcategory ||
               filterMode ||
               datePreset ||
               fromDate ||
@@ -577,13 +558,13 @@ const ExpenseEntry = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-[#FFF8F1] border-b border-[#E5E7EB] text-[11px] font-extrabold uppercase tracking-wider text-[#172033]">
-                <th className="py-3.5 px-4 sm:px-6">Entry ID & Date</th>
-                <th className="py-3.5 px-4 sm:px-6">Category & Item</th>
-                <th className="py-3.5 px-4 sm:px-6">Amount</th>
-                <th className="py-3.5 px-4 sm:px-6">Payment Mode</th>
-                <th className="py-3.5 px-4 sm:px-6">Bill / Receipt</th>
-                <th className="py-3.5 px-4 sm:px-6">Entered By</th>
-                <th className="py-3.5 px-4 sm:px-6 text-right">Actions</th>
+                <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Entry ID & Date</th>
+                <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Category & Item</th>
+                <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap text-right">Amount</th>
+                <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Payment Mode</th>
+                <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Bill / Receipt</th>
+                <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Entered By</th>
+                <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E5E7EB] text-xs font-medium text-[#374151]">
@@ -759,60 +740,38 @@ const ExpenseEntry = () => {
                 </div>
               </div>
 
-              {/* Category & Subcategory Row */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-[#172033] mb-1">
-                    Category <span className="text-rose-500">*</span>
-                  </label>
-                  <select
-                    required
-                    value={formData.category}
-                    onChange={(e) =>
-                      setFormData({ ...formData, category: e.target.value, subcategory: '' })
-                    }
-                    className="w-full px-3 py-2 bg-[#FFF8F1]/40 border border-[#E5E7EB] rounded-xl text-xs font-semibold text-[#172033] focus:outline-none focus:border-[#F97316]"
-                  >
-                    <option value="">Select Category</option>
-                    {categories
-                      .filter((c) => c.isActive)
-                      .map((cat) => (
-                        <option key={cat._id} value={cat.name}>
-                          {cat.name}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-[#172033] mb-1">
-                    Subcategory
-                  </label>
-                  <select
-                    value={formData.subcategory}
-                    onChange={(e) => setFormData({ ...formData, subcategory: e.target.value })}
-                    className="w-full px-3 py-2 bg-[#FFF8F1]/40 border border-[#E5E7EB] rounded-xl text-xs font-semibold text-[#172033] focus:outline-none focus:border-[#F97316]"
-                    disabled={!availableSubcategories.length}
-                  >
-                    <option value="">Select Subcategory (Optional)</option>
-                    {availableSubcategories.map((sub, idx) => (
-                      <option key={idx} value={sub.name}>
-                        {sub.name}
+              {/* Category */}
+              <div>
+                <label className="block text-xs font-bold text-[#172033] mb-1">
+                  Category <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  required
+                  value={formData.category}
+                  onChange={(e) =>
+                    setFormData({ ...formData, category: e.target.value })
+                  }
+                  className="w-full px-3 py-2 bg-[#FFF8F1]/40 border border-[#E5E7EB] rounded-xl text-xs font-semibold text-[#172033] focus:outline-none focus:border-[#F97316]"
+                >
+                  <option value="">Select Category</option>
+                  {categories
+                    .filter((c) => c.isActive !== false)
+                    .map((cat, idx) => (
+                      <option key={cat._id || idx} value={cat.name}>
+                        {cat.name}
                       </option>
                     ))}
-                  </select>
-                </div>
+                </select>
               </div>
 
               {/* Item / Description */}
               <div>
                 <label className="block text-xs font-bold text-[#172033] mb-1">
-                  Item / Description <span className="text-rose-500">*</span>
+                  Item / Description <span className="text-slate-400 font-normal">(Optional)</span>
                 </label>
                 <input
                   type="text"
-                  required
-                  placeholder="e.g. 5kg Onions, Gas cylinder refill, Daily wages"
+                  placeholder="e.g. 5kg Onions, Gas cylinder refill, Daily wages (Optional)"
                   value={formData.item}
                   onChange={(e) => setFormData({ ...formData, item: e.target.value })}
                   className="w-full px-3 py-2 bg-[#FFF8F1]/40 border border-[#E5E7EB] rounded-xl text-xs font-medium text-[#172033] focus:outline-none focus:border-[#F97316]"

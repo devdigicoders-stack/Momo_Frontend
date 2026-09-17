@@ -84,6 +84,8 @@ const AppRoutes = () => {
           {/* Sales: Super Admin & Main Manager ONLY (Manager 2 is strictly excluded) */}
           <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN', 'MAIN_MANAGER']} />}>
             <Route path="/sales" element={<SalesEntry />} />
+            <Route path="/salesManager" element={<SalesEntry />} />
+            <Route path="/sales-manager" element={<SalesEntry />} />
           </Route>
 
           {/* Expenses, Momo Purchases, Cash, Chef Reqs, Employees: Super Admin, Main Manager, Manager 2 */}

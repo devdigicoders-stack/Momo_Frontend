@@ -31,6 +31,14 @@ import Swal from 'sweetalert2';
 
 const PAYMENT_MODES = ['Cash', 'UPI', 'Card', 'Net Banking', 'Canara / Bank', 'Paytm', 'PhonePe', 'Other'];
 
+const DEFAULT_MOMO_TYPES = [
+  { name: 'Veg', defaultRate: 5.00, isActive: true },
+  { name: 'Paneer', defaultRate: 6.67, isActive: true },
+  { name: 'Butter Cheese Sweetcorn', defaultRate: 7.50, isActive: true },
+  { name: 'Chaap', defaultRate: 7.50, isActive: true },
+  { name: 'Mushroom', defaultRate: 8.33, isActive: true },
+];
+
 const MomoPurchaseEntry = () => {
   const { user } = useAuth();
   const [purchases, setPurchases] = useState([]);
@@ -61,7 +69,6 @@ const MomoPurchaseEntry = () => {
   // Filter & Search state
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('');
-  const [filterMode, setFilterMode] = useState('');
   const [datePreset, setDatePreset] = useState('');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
@@ -73,8 +80,6 @@ const MomoPurchaseEntry = () => {
     momoType: '',
     quantity: '',
     rate: '',
-    supplierName: '',
-    paymentMode: 'Cash',
     remarks: '',
     reason: '',
   };
@@ -89,7 +94,6 @@ const MomoPurchaseEntry = () => {
         limit: 1000,
         search: searchTerm,
         momoType: filterType,
-        paymentMode: filterMode,
         datePreset,
         fromDate,
         toDate,
@@ -97,16 +101,15 @@ const MomoPurchaseEntry = () => {
       });
 
       if (res.success && res.data && res.data.length > 0) {
-        const headers = ['Entry ID', 'Date', 'Momo Type', 'Quantity', 'Rate (Rs.)', 'Total Amount (Rs.)', 'Supplier', 'Payment Mode', 'Remarks', 'Edited', 'Entered By', 'Created At'];
+        const headers = ['Entry ID', 'Date', 'Momo Type', 'Total Qty (Pcs)', 'Payable Qty (90%)', 'Rate (Rs.)', 'Total Amount (Rs.)', 'Remarks', 'Edited', 'Entered By', 'Created At'];
         const rows = res.data.map((p) => [
           p.entryCode || `MOM-${p._id.toString().slice(-4)}`,
           new Date(p.date).toLocaleDateString('en-IN'),
           p.momoType,
           p.quantity,
+          (p.quantity * 0.9).toFixed(0),
           p.rate,
           p.totalAmount,
-          p.supplierName || '',
-          p.paymentMode,
           p.remarks || '',
           p.isEdited ? 'Yes' : 'No',
           p.enteredBy?.name || 'N/A',
@@ -128,11 +131,14 @@ const MomoPurchaseEntry = () => {
   const fetchTypes = async () => {
     try {
       const res = await momoTypeService.getAllMomoTypes();
-      if (res.success) {
+      if (res.success && res.data && res.data.length > 0) {
         setMomoTypes(res.data);
+      } else {
+        setMomoTypes(DEFAULT_MOMO_TYPES);
       }
     } catch (error) {
       console.error('Failed to load momo types:', error);
+      setMomoTypes(DEFAULT_MOMO_TYPES);
     }
   };
 
@@ -145,7 +151,6 @@ const MomoPurchaseEntry = () => {
         limit,
         search: searchTerm,
         momoType: filterType,
-        paymentMode: filterMode,
         datePreset,
         fromDate,
         toDate,
@@ -172,7 +177,7 @@ const MomoPurchaseEntry = () => {
 
   useEffect(() => {
     fetchPurchases(1);
-  }, [searchTerm, filterType, filterMode, datePreset, fromDate, toDate, sortBy]);
+  }, [searchTerm, filterType, datePreset, fromDate, toDate, sortBy]);
 
   const handlePageChange = (newPage) => {
     fetchPurchases(newPage);
@@ -189,7 +194,6 @@ const MomoPurchaseEntry = () => {
   const handleResetFilters = () => {
     setSearchTerm('');
     setFilterType('');
-    setFilterMode('');
     setDatePreset('');
     setFromDate('');
     setToDate('');
@@ -202,12 +206,14 @@ const MomoPurchaseEntry = () => {
     setFormData((prev) => ({
       ...prev,
       momoType: typeName,
-      rate: selected && selected.defaultRate ? selected.defaultRate : prev.rate,
+      rate: selected && selected.defaultRate !== undefined ? selected.defaultRate : prev.rate,
     }));
   };
 
-  const calculatedTotal =
-    (Number(formData.quantity) || 0) * (Number(formData.rate) || 0);
+  // Payment Quantity Rule: Pay for 90% of total momo quantity (e.g. 1000 pcs -> pay for 900 pcs)
+  const rawQuantity = Number(formData.quantity) || 0;
+  const payableQuantity = rawQuantity * 0.90;
+  const calculatedTotal = Number((payableQuantity * (Number(formData.rate) || 0)).toFixed(2));
 
   const handleOpenAdd = () => {
     setEditingPurchase(null);
@@ -419,20 +425,6 @@ const MomoPurchaseEntry = () => {
               ))}
             </select>
 
-            {/* Payment Mode Filter */}
-            <select
-              value={filterMode}
-              onChange={(e) => setFilterMode(e.target.value)}
-              className="px-3 py-2 bg-[#FFF8F1]/60 border border-[#E5E7EB] rounded-xl text-xs font-medium text-[#172033] focus:outline-none focus:border-[#F97316] cursor-pointer"
-            >
-              <option value="">All Payment Modes</option>
-              {PAYMENT_MODES.map((mode) => (
-                <option key={mode} value={mode}>
-                  {mode}
-                </option>
-              ))}
-            </select>
-
             {/* Sort Options */}
             <select
               value={sortBy}
@@ -447,7 +439,6 @@ const MomoPurchaseEntry = () => {
 
             {(searchTerm ||
               filterType ||
-              filterMode ||
               datePreset ||
               fromDate ||
               toDate ||
@@ -514,27 +505,26 @@ const MomoPurchaseEntry = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-[#FFF8F1] border-b border-[#E5E7EB] text-[11px] font-extrabold uppercase tracking-wider text-[#172033]">
-                <th className="py-3.5 px-4 sm:px-6">Entry ID & Date</th>
-                <th className="py-3.5 px-4 sm:px-6">Momo Type</th>
-                <th className="py-3.5 px-4 sm:px-6">Quantity</th>
-                <th className="py-3.5 px-4 sm:px-6">Rate (₹)</th>
-                <th className="py-3.5 px-4 sm:px-6">Total Amount</th>
-                <th className="py-3.5 px-4 sm:px-6">Supplier</th>
-                <th className="py-3.5 px-4 sm:px-6">Payment Mode</th>
-                <th className="py-3.5 px-4 sm:px-6">Entered By</th>
-                <th className="py-3.5 px-4 sm:px-6 text-right">Actions</th>
+                <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Entry ID & Date</th>
+                <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Momo Type</th>
+                <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap text-right">Total Qty (Pcs)</th>
+                <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap text-right">Payable Qty (90%)</th>
+                <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap text-right">Rate (₹)</th>
+                <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap text-right">Total Amount</th>
+                <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Entered By</th>
+                <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E5E7EB] text-xs font-medium text-[#374151]">
               {loading ? (
                 <tr>
-                  <td colSpan="9" className="p-6">
+                  <td colSpan="8" className="p-6">
                     <SkeletonLoader rows={4} />
                   </td>
                 </tr>
               ) : purchases.length === 0 ? (
                 <tr>
-                  <td colSpan="9" className="py-12 text-center text-slate-400">
+                  <td colSpan="8" className="py-12 text-center text-slate-400">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <FileText className="w-8 h-8 text-slate-300" />
                       <p className="font-semibold text-sm text-[#172033]">No Momo Purchases Found</p>
@@ -571,22 +561,19 @@ const MomoPurchaseEntry = () => {
                     <td className="py-3.5 px-4 sm:px-6 font-bold text-[#F97316] whitespace-nowrap">
                       {item.momoType}
                     </td>
-                    <td className="py-3.5 px-4 sm:px-6 font-semibold text-[#172033] whitespace-nowrap">
-                      {item.quantity} pcs / units
+                    <td className="py-3.5 px-4 sm:px-6 font-semibold text-[#172033] whitespace-nowrap text-right">
+                      {item.quantity?.toLocaleString('en-IN')} pcs
                     </td>
-                    <td className="py-3.5 px-4 sm:px-6 font-semibold text-slate-600 whitespace-nowrap">
+                    <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap text-right">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200/80 text-amber-800 font-bold text-xs">
+                        {(item.quantity * 0.90).toFixed(0)} pcs
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 sm:px-6 font-semibold text-slate-600 whitespace-nowrap text-right">
                       ₹{item.rate}
                     </td>
-                    <td className="py-3.5 px-4 sm:px-6 font-bold text-[#16A34A] text-sm whitespace-nowrap">
+                    <td className="py-3.5 px-4 sm:px-6 font-bold text-[#16A34A] text-sm whitespace-nowrap text-right">
                       ₹{item.totalAmount?.toLocaleString('en-IN')}
-                    </td>
-                    <td className="py-3.5 px-4 sm:px-6 text-[#6B7280] whitespace-nowrap">
-                      {item.supplierName || '—'}
-                    </td>
-                    <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700">
-                        {item.paymentMode}
-                      </span>
                     </td>
                     <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap">
                       <div className="font-semibold text-[#172033]">{item.enteredBy?.name || 'Staff'}</div>
@@ -750,55 +737,29 @@ const MomoPurchaseEntry = () => {
                 </div>
               </div>
 
-              {/* Calculated Total Amount Box */}
-              <div className="p-3.5 bg-[#FFF0E5] rounded-2xl border border-[#F97316]/30 flex items-center justify-between">
-                <div className="flex items-center space-x-2 text-xs font-bold text-[#172033]">
-                  <Calculator className="w-4 h-4 text-[#F97316]" />
-                  <span>Calculated Total Amount:</span>
+              {/* Calculated Total Amount Box (90% Quantity Rule) */}
+              <div className="p-3.5 bg-[#FFF0E5] rounded-2xl border border-[#F97316]/30 space-y-1">
+                <div className="flex items-center justify-between text-xs font-bold text-[#172033]">
+                  <div className="flex items-center space-x-2">
+                    <Calculator className="w-4 h-4 text-[#F97316]" />
+                    <span>Calculated Total Amount:</span>
+                  </div>
+                  <div className="text-base font-black text-[#F97316]">
+                    ₹{calculatedTotal.toLocaleString('en-IN')}
+                  </div>
                 </div>
-                <div className="text-base font-black text-[#F97316]">
-                  ₹{calculatedTotal.toLocaleString('en-IN')}
-                </div>
-              </div>
-
-              {/* Supplier & Payment Mode Row */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-[#172033] mb-1">
-                    Supplier Name (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Shyam Traders"
-                    value={formData.supplierName}
-                    onChange={(e) => setFormData({ ...formData, supplierName: e.target.value })}
-                    className="w-full px-3 py-2 bg-[#FFF8F1]/40 border border-[#E5E7EB] rounded-xl text-xs font-medium text-[#172033] focus:outline-none focus:border-[#F97316]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-[#172033] mb-1">
-                    Payment Mode <span className="text-rose-500">*</span>
-                  </label>
-                  <select
-                    required
-                    value={formData.paymentMode}
-                    onChange={(e) => setFormData({ ...formData, paymentMode: e.target.value })}
-                    className="w-full px-3 py-2 bg-[#FFF8F1]/40 border border-[#E5E7EB] rounded-xl text-xs font-semibold text-[#172033] focus:outline-none focus:border-[#F97316]"
-                  >
-                    {PAYMENT_MODES.map((mode) => (
-                      <option key={mode} value={mode}>
-                        {mode}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {rawQuantity > 0 && (
+                  <div className="text-[11px] text-[#6B7280] font-medium pt-1 border-t border-[#F97316]/20 flex items-center justify-between">
+                    <span>Payable for 90% Qty: <b>{payableQuantity.toFixed(1)} pcs</b> (out of {rawQuantity} pcs)</span>
+                    <span className="text-orange-600 font-bold">₹{formData.rate || 0}/pc</span>
+                  </div>
+                )}
               </div>
 
               {/* Remarks */}
               <div>
                 <label className="block text-xs font-bold text-[#172033] mb-1">
-                  Remarks / Notes
+                  Remarks / Notes (Optional)
                 </label>
                 <textarea
                   rows="2"
